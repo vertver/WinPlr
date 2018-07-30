@@ -32,7 +32,7 @@
 #endif
 
 #define _RELEASE(x) if(x) { x->Release(); } x = NULL;	// safety release pointers
-#define PLAYER_VERSION "#PLAYER_VERSION: 0.1#"
+#define PLAYER_VERSION "#PLAYER_VERSION: 0.1.1#"
 
 typedef enum
 {
@@ -123,8 +123,11 @@ namespace Player
 	class Stream
 	{
 	public:
-		VOID CreateSimpleStreamFromBuffer(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
-		VOID CreateDirectSoundStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
+		STREAM_DATA CreateSimpleStreamFromBuffer(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
+		STREAM_DATA CreateDirectSoundStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
+		VOID PlayBufferSound(STREAM_DATA streamData);
+		VOID StopBufferSound(STREAM_DATA streamData);
+		VOID ReleaseSoundBuffers(STREAM_DATA streamData);
 	};
 	class ErrorHandler
 	{
@@ -139,8 +142,8 @@ namespace Player
 	{
 	public:
 		HANDLE ThCreateNewMutex(LPCSTR lpName);
-		LPDWORD ThCreateNewThread(LPVOID lpFunc, HANDLE hMutex);
-		VOID ThSetNewThreadName(LPDWORD dwThreadID, LPCSTR lpName);
+		DWORD ThCreateNewThread(LPVOID lpFunc, HANDLE hMutex);
+		VOID ThSetNewThreadName(DWORD dwThreadID, LPCSTR lpName);
 	};
 	class DirectGraphic
 	{

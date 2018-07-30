@@ -42,13 +42,13 @@ Player::ThreadSystem::ThCreateNewMutex(
 * Create thread with user method and 
 * return thread id
 *************************************************/
-LPDWORD 
+DWORD 
 Player::ThreadSystem::ThCreateNewThread(
 	LPVOID lpFunc,
 	HANDLE hMutex
 )
 {
-	LPDWORD lpUserThreadID = NULL;
+	DWORD lpUserThreadID = NULL;
 
 	// create window thread
 	HANDLE hThread = CreateThread(
@@ -57,7 +57,7 @@ Player::ThreadSystem::ThCreateNewThread(
 		(LPTHREAD_START_ROUTINE)lpFunc,
 		hMutex,
 		NULL,
-		lpUserThreadID
+		&lpUserThreadID
 	);
 	if (!hThread)
 	{
@@ -74,13 +74,13 @@ Player::ThreadSystem::ThCreateNewThread(
 *************************************************/
 VOID 
 Player::ThreadSystem::ThSetNewThreadName(
-	LPDWORD dwThreadID,
+	DWORD dwThreadID,
 	LPCSTR lpName
 )
 {
 	THREAD_NAME stName;
 	stName.dwType = 0x1000;
-	stName.dwThreadID = (DWORD)dwThreadID;
+	stName.dwThreadID = dwThreadID;
 	stName.dwFlags = NULL;
 	stName.lpName = lpName;
 

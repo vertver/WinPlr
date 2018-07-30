@@ -15,23 +15,25 @@ Player::ErrorHandler hStreamErr;
 
 /*************************************************
 * CreateStreamFromBuffer():
-* Create stream from FILE_DATA struct info
+* Create stream from FILE_DATA
+* and PCM_DATA struct
 *************************************************/
-VOID
+STREAM_DATA
 Player::Stream::CreateSimpleStreamFromBuffer(
 	FILE_DATA dData,
 	PCM_DATA dPCM,
 	HWND hwnd
 )
 {
-	HANDLE hWaveData;
+	STREAM_DATA streamData;
+	streamData.dPCM = dPCM;
 	hAudioFile = dData.hFile;
 
 	// create wave callback
 	WAVEFORMATEX waveFormat = {};
-	waveFormat.nSamplesPerSec = dPCM.dwSamplerate;
-	waveFormat.wBitsPerSample = dPCM.wBits;
-	waveFormat.nChannels = dPCM.wChannels;
+	waveFormat.nSamplesPerSec = streamData.dPCM.dwSamplerate;
+	waveFormat.wBitsPerSample = streamData.dPCM.wBits;
+	waveFormat.nChannels = streamData.dPCM.wChannels;
 	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
 	waveFormat.cbSize = NULL;
 	// check for current format
@@ -115,37 +117,46 @@ Player::Stream::CreateSimpleStreamFromBuffer(
 	default:
 		break;
 	}
+
+	streamData.bPlaying = TRUE;
+	streamData.lpDirectNotify = NULL;
+	streamData.lpDirectSound = NULL;
+	streamData.lpPrimaryDirectBuffer = NULL;
+	streamData.lpSecondaryDirectBuffer = NULL;
+	return streamData;
 }
 
 /*************************************************
 * CreateStreamFromBuffer():
-* Create DirectSound stream by user data
+* Create DirectSound stream from user data
 *************************************************/
-VOID 
+STREAM_DATA
 Player::Stream::CreateDirectSoundStream(
 	FILE_DATA dData,
 	PCM_DATA dPCM,
 	HWND hwnd
 )
 {
-	STREAM_DATA dStream = {};
+	STREAM_DATA streamData = {};
 	DSBUFFERDESC bufferDesc = {};
 	WAVEFORMATEX waveFormat = {};
-	IDirectSoundBuffer* tempBuffer = {};
-	dStream.bPlaying = FALSE;	// make true before init
-	dStream.dPCM = dPCM;
+	LPDIRECTSOUNDBUFFER tempBuffer = {};
+	streamData.bPlaying = FALSE;	// make true before init
+	streamData.dPCM = dPCM;
 
 	// initialize the direct sound interface 
 	if (!SUCCEEDED(DirectSoundCreate(
 		NULL,
-		&dStream.lpDirectSound,
+		&streamData.lpDirectSound,
 		NULL)))
 	{
-		hStreamErr.CreateErrorText("Failed to create sound device (DirectSound)");
+		hStreamErr.CreateErrorText(
+			"Failed to create sound device (DirectSound). Check your audio drivers\nor restart with '-no_direct_sound' argument'."
+		);
 	}
 
 	// set the cooperative level
-	HRESULT hr = dStream.lpDirectSound->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
+	HRESULT hr = streamData.lpDirectSound->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
 	if (!SUCCEEDED(hr))
 	{
 		hStreamErr.CreateErrorText("Failed to set cooperative level (DirectSound)", hr);
@@ -156,7 +167,7 @@ Player::Stream::CreateDirectSoundStream(
 	dsCaps.dwSize = sizeof(DSCAPS);
 
 	// get device caps for direct sound pointer
-	hr = dStream.lpDirectSound->GetCaps(&dsCaps);
+	hr = streamData.lpDirectSound->GetCaps(&dsCaps);
 	if (!SUCCEEDED(hr))
 	{
 		hStreamErr.CreateErrorText("Stream error! Can't get device caps (DirectSound)", hr);
@@ -171,8 +182,8 @@ Player::Stream::CreateDirectSoundStream(
 	bufferDesc.guid3DAlgorithm = GUID_NULL;
 	
 	// create primary sound buffer with buffer descriptor
-	hr = dStream.lpDirectSound->CreateSoundBuffer(&bufferDesc,
-		&dStream.lpPrimaryDirectBuffer,
+	hr = streamData.lpDirectSound->CreateSoundBuffer(&bufferDesc,
+		&streamData.lpPrimaryDirectBuffer,
 		NULL
 	);
 	if (!SUCCEEDED(hr))
@@ -226,7 +237,7 @@ Player::Stream::CreateDirectSoundStream(
 	}
 
 	// set the primary buffer to be the wave format specified.
-	hr = dStream.lpPrimaryDirectBuffer->SetFormat(&waveFormat);
+	hr = streamData.lpPrimaryDirectBuffer->SetFormat(&waveFormat);
 	if (!SUCCEEDED(hr))
 	{
 		hStreamErr.CreateErrorText("Stream error! Can't set wave format for sound buffer (DirectSound)", hr);
@@ -241,7 +252,7 @@ Player::Stream::CreateDirectSoundStream(
 	bufferDesc.guid3DAlgorithm = GUID_NULL;
 
 	// create sound buffer
-	hr = dStream.lpDirectSound->CreateSoundBuffer(
+	hr = streamData.lpDirectSound->CreateSoundBuffer(
 		&bufferDesc,
 		&tempBuffer,
 		NULL
@@ -254,7 +265,7 @@ Player::Stream::CreateDirectSoundStream(
 	// create query interface
 	hr = tempBuffer->QueryInterface(
 		IID_IDirectSoundBuffer,
-		(LPVOID*)&dStream.lpSecondaryDirectBuffer
+		(LPVOID*)&streamData.lpSecondaryDirectBuffer
 	);
 	if (!SUCCEEDED(hr))
 	{
@@ -269,7 +280,7 @@ Player::Stream::CreateDirectSoundStream(
 	DWORD dwBufferSize;
 
 	// lock buffer
-	hr = dStream.lpSecondaryDirectBuffer->Lock(
+	hr = streamData.lpSecondaryDirectBuffer->Lock(
 		NULL,
 		dData.dwSize,
 		(void**)&pBuffer,
@@ -286,7 +297,7 @@ Player::Stream::CreateDirectSoundStream(
 	memcpy(pBuffer, dPCM.lpData, dData.dwSize);
 
 	// unlock buffer
-	hr = dStream.lpSecondaryDirectBuffer->Unlock(
+	hr = streamData.lpSecondaryDirectBuffer->Unlock(
 		(LPVOID)pBuffer,
 		dwBufferSize,
 		NULL,
@@ -301,13 +312,79 @@ Player::Stream::CreateDirectSoundStream(
 	delete[] waveData;
 	waveData = NULL;
 
-	// play sound
-	hr = dStream.lpSecondaryDirectBuffer->SetCurrentPosition(NULL);
-	hr = dStream.lpSecondaryDirectBuffer->SetVolume(DSBVOLUME_MAX);
-	hr = dStream.lpSecondaryDirectBuffer->Play(NULL, NULL, NULL);
-	if (!SUCCEEDED(hr))
+	return streamData;
+}
+
+/*************************************************
+* PlayBufferSound():
+* Play sound from buffer 
+*************************************************/
+VOID
+Player::Stream::PlayBufferSound(
+	STREAM_DATA streamData
+)
+{
+	HRESULT hr;
+
+	// if secondary buffer is not empty - use DirectSound
+	if (streamData.lpSecondaryDirectBuffer && streamData.lpPrimaryDirectBuffer)
 	{
-		hStreamErr.CreateErrorText("Stream error! Can't start playing", hr);
+		// play sound
+		hr = streamData.lpSecondaryDirectBuffer->SetCurrentPosition(NULL);
+		hr = streamData.lpSecondaryDirectBuffer->SetVolume(DSBVOLUME_MAX);
+		hr = streamData.lpSecondaryDirectBuffer->Play(NULL, NULL, NULL);
+		if (!SUCCEEDED(hr))
+		{
+			hStreamErr.CreateErrorText("Stream error! Can't start playing", hr);
+		}
+		streamData.bPlaying = TRUE;
 	}
-	dStream.bPlaying = TRUE;
+}
+
+/*************************************************
+* StopBufferSound():
+* Stop playing buffer
+*************************************************/
+VOID 
+Player::Stream::StopBufferSound(
+	STREAM_DATA streamData
+)
+{
+	HRESULT hr;
+	if (streamData.lpSecondaryDirectBuffer)
+	{
+		hr = streamData.lpSecondaryDirectBuffer->Stop();
+		if (!SUCCEEDED(hr))
+		{
+			hStreamErr.CreateErrorText("Stream error! Can't stop playing", hr);
+		}
+	}
+	streamData.bPlaying = FALSE;
+}
+
+/*************************************************
+* ReleaseSoundBuffers():
+* Release all DirectSound buffers
+*************************************************/
+VOID
+Player::Stream::ReleaseSoundBuffers(
+	STREAM_DATA streamData
+)
+{
+	if (streamData.lpDirectNotify != NULL)
+	{
+		_RELEASE(streamData.lpDirectNotify);
+	}
+	if (streamData.lpDirectSound != NULL)
+	{
+		_RELEASE(streamData.lpDirectSound);
+	}
+	if (streamData.lpPrimaryDirectBuffer != NULL)
+	{
+		_RELEASE(streamData.lpPrimaryDirectBuffer);
+	}
+	if (streamData.lpSecondaryDirectBuffer != NULL)
+	{
+		_RELEASE(streamData.lpSecondaryDirectBuffer);
+	}
 }
