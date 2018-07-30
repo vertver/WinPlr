@@ -32,7 +32,7 @@
 #endif
 
 #define _RELEASE(x) if(x) { x->Release(); } x = NULL;	// safety release pointers
-#define PLAYER_VERSION "#PLAYER_VERSION: 0.1.1#"
+#define PLAYER_VERSION "#PLAYER_VERSION: 0.1.12#"
 
 typedef enum
 {
