@@ -23,6 +23,11 @@ Player::Buffer::LoadFileToBuffer(
 	FFT_DATA dFFT
 )
 {
+	// set zero for our structs
+	ZeroMemory(&dFile, sizeof(FILE_DATA));
+	ZeroMemory(&dPCM, sizeof(PCM_DATA));
+	ZeroMemory(&dFFT, sizeof(FFT_DATA));
+
 	// set filedialog struct
 	OPENFILENAMEA oFN;
 	char szName[MAX_PATH];
@@ -94,7 +99,8 @@ Player::Buffer::LoadFileToBuffer(
 	dFFT.dwSizeWindow = 2048;
 	dFFT.eType = BLACKMANHARRIS_WINDOW;
 
-	HANDLE_DATA hdReturn = { NULL };
+	HANDLE_DATA hdReturn = { };
+	ZeroMemory(&hdReturn, sizeof(HANDLE_DATA));
 	hdReturn.dData = dFile;
 	hdReturn.dFFT = dFFT;
 	hdReturn.dPCM = dPCM;

@@ -11,7 +11,9 @@
 
 #include "WinAudio.h"
 
-// unused
+/************************************************
+* DEPRECATED CODE:
+************************************************/
 VOID 
 Player::DirectGraphic::SetDirectWindow(
 	HWND hwnd,

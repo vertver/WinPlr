@@ -26,16 +26,18 @@ Player::Stream::CreateMMIOStream(
 )
 {
 	STREAM_DATA streamData;
+	ZeroMemory(&streamData, sizeof(STREAM_DATA));
 	streamData.dPCM = dPCM;
-	hAudioFile = dData.hFile;
 
 	// create wave callback
 	WAVEFORMATEX waveFormat = {};
+	ZeroMemory(&waveFormat, sizeof(WAVEFORMATEX));
 	waveFormat.nSamplesPerSec = streamData.dPCM.dwSamplerate;
 	waveFormat.wBitsPerSample = streamData.dPCM.wBits;
 	waveFormat.nChannels = streamData.dPCM.wChannels;
 	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
 	waveFormat.cbSize = NULL;
+
 	// check for current format
 	switch (dData.eType)
 	{
@@ -44,29 +46,11 @@ Player::Stream::CreateMMIOStream(
 		waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
 		break;
 	case ALAC_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_ALAC;
-		waveFormat.nAvgBytesPerSec = (dPCM.wBitrate / 8);
-		break;
 	case FLAC_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_FLAC;
-		waveFormat.nAvgBytesPerSec = (dPCM.wBitrate / 8);
-		break;
 	case MPEG3_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_MPEGLAYER3;
-		waveFormat.nAvgBytesPerSec = (dPCM.wBitrate / 8);
-		break;
 	case MPEG4_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_MPEG_ADTS_AAC;
-		waveFormat.nAvgBytesPerSec = (dPCM.wBitrate / 8);
-		break;
 	case OGG_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_OGG_VORBIS_MODE_1;
-		waveFormat.nAvgBytesPerSec = (dPCM.wBitrate / 8);
-		break;
 	case OPUS_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_OPUS;
-		waveFormat.nAvgBytesPerSec = (dPCM.wBitrate / 8);
-		break;
 	case MPEG2_FILE:
 	case AIF_FILE:
 	case UNKNOWN_FILE:
@@ -86,36 +70,13 @@ Player::Stream::CreateMMIOStream(
 	);
 	switch (uWave)
 	{
-	case MMSYSERR_ALLOCATED:
-		CreateWarningText(
-			"Warning! Current resource is already allocated"
-		);
-		break;
-	case MMSYSERR_BADDEVICEID:
-		CreateErrorText(
-			"Stream error! Bad device"
-		);
-		break;
-	case MMSYSERR_NODRIVER:
-		CreateErrorText(
-			"Stream error! No driver detected"
-		);
-		break;
-	case MMSYSERR_NOMEM:
-		CreateErrorText(
-			"Stream error! Unnable to allocate (memory error)"
-		);
-		break;
-	case WAVERR_BADFORMAT:
-		CreateErrorText(
-			"Stream error! Unsupported handle (!wave)"
-		);
-		break;
-	case WAVERR_SYNC:
-		__debugbreak();
-	case MMSYSERR_NOERROR:
-	default:
-		break;
+	case MMSYSERR_ALLOCATED:	CreateWarningText	("Warning! Current resource is already allocated");		break;
+	case MMSYSERR_BADDEVICEID:	CreateErrorText		("Stream error! Bad device");							break;
+	case MMSYSERR_NODRIVER:		CreateErrorText		("Stream error! No driver detected");					break;
+	case MMSYSERR_NOMEM:		CreateErrorText		("Stream error! Unnable to allocate (memory error)");	break;
+	case WAVERR_BADFORMAT:		CreateErrorText		("Stream error! Unsupported handle (!wave)");			break;
+	case WAVERR_SYNC:			__debugbreak();
+	case MMSYSERR_NOERROR:		default:			break;
 	}
 
 	streamData.bPlaying = TRUE;
@@ -124,6 +85,73 @@ Player::Stream::CreateMMIOStream(
 	streamData.lpPrimaryDirectBuffer = NULL;
 	streamData.lpSecondaryDirectBuffer = NULL;
 	return streamData;
+}
+
+/*************************************************
+* CreateWASAPIStream():
+* Create WASAPI stream from user data
+*************************************************/
+STREAM_DATA
+Player::Stream::CreateWASAPIStream(
+	FILE_DATA fileData,
+	PCM_DATA pcmData,
+	HWND hwnd
+)
+{
+	Player::ThreadSystem threadSystem;
+	STREAM_DATA streamData;
+	ZeroMemory(&streamData, sizeof(STREAM_DATA));
+	streamData.dPCM = pcmData;
+
+	// create wave callback
+	WAVEFORMATEX waveFormat = {};
+	ZeroMemory(&waveFormat, sizeof(WAVEFORMATEX));
+	waveFormat.nSamplesPerSec = streamData.dPCM.dwSamplerate;
+	waveFormat.wBitsPerSample = streamData.dPCM.wBits;
+	waveFormat.nChannels = streamData.dPCM.wChannels;
+	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
+	waveFormat.cbSize = NULL;
+
+	// check for current format
+	switch (fileData.eType)
+	{
+	case WAV_FILE:
+		waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+		waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+		break;
+	case ALAC_FILE:
+	case FLAC_FILE:
+	case MPEG3_FILE:
+	case MPEG4_FILE:
+	case OGG_FILE:
+	case OPUS_FILE:
+	case MPEG2_FILE:
+	case AIF_FILE:
+	case UNKNOWN_FILE:
+	default:
+		waveFormat.wFormatTag = WAVE_FORMAT_UNKNOWN;
+		break;
+	}
+
+	// open default wave out
+	MMRESULT uWave = waveOutOpen(
+		NULL,
+		WAVE_MAPPER,
+		&waveFormat,
+		NULL,
+		NULL,
+		CALLBACK_THREAD
+	);
+	switch (uWave)
+	{
+	case MMSYSERR_ALLOCATED:	CreateWarningText("Warning! Current resource is already allocated");	break;
+	case MMSYSERR_BADDEVICEID:	CreateErrorText("Stream error! Bad device");							break;
+	case MMSYSERR_NODRIVER:		CreateErrorText("Stream error! No driver detected");					break;
+	case MMSYSERR_NOMEM:		CreateErrorText("Stream error! Unnable to allocate (memory error)");	break;
+	case WAVERR_BADFORMAT:		CreateErrorText("Stream error! Unsupported handle (!wave)");			break;
+	case WAVERR_SYNC:			__debugbreak();
+	case MMSYSERR_NOERROR:		default:			break;
+	}
 }
 
 /*************************************************
@@ -140,10 +168,15 @@ Player::Stream::CreateDirectSoundStream(
 	STREAM_DATA streamData = {};
 	DSBUFFERDESC bufferDesc = {};
 	WAVEFORMATEX waveFormat = {};
-	HRESULT hr= NULL;
+	HRESULT hr = NULL;
 	LPDIRECTSOUNDBUFFER tempBuffer = {};
 	streamData.bPlaying = FALSE;	// make true before init
 	streamData.dPCM = dPCM;
+
+	ZeroMemory(&streamData, sizeof(STREAM_DATA));
+	ZeroMemory(&bufferDesc, sizeof(DSBUFFERDESC));
+	ZeroMemory(&waveFormat, sizeof(WAVEFORMATEX));
+	ZeroMemory(&tempBuffer, sizeof(LPDIRECTSOUNDBUFFER));
 
 	// initialize the direct sound interface 
 	if (!SUCCEEDED(DirectSoundCreate(
@@ -162,6 +195,7 @@ Player::Stream::CreateDirectSoundStream(
 
 	// create device caps
 	DSCAPS dsCaps;
+	ZeroMemory(&dsCaps, sizeof(DSCAPS));
 	dsCaps.dwSize = sizeof(DSCAPS);
 
 	// get device caps for direct sound pointer
@@ -351,20 +385,8 @@ Player::Stream::ReleaseSoundBuffers(
 	STREAM_DATA streamData
 )
 {
-	if (streamData.lpDirectNotify != NULL)
-	{
-		_RELEASE(streamData.lpDirectNotify);
-	}
-	if (streamData.lpDirectSound != NULL)
-	{
-		_RELEASE(streamData.lpDirectSound);
-	}
-	if (streamData.lpPrimaryDirectBuffer != NULL)
-	{
-		_RELEASE(streamData.lpPrimaryDirectBuffer);
-	}
-	if (streamData.lpSecondaryDirectBuffer != NULL)
-	{
-		_RELEASE(streamData.lpSecondaryDirectBuffer);
-	}
+	_RELEASE(streamData.lpDirectNotify);
+	_RELEASE(streamData.lpDirectSound);
+	_RELEASE(streamData.lpPrimaryDirectBuffer);
+	_RELEASE(streamData.lpSecondaryDirectBuffer);
 }

@@ -23,6 +23,7 @@
 #include <strsafe.h>
 #include <d2d1_3.h>
 #include <dxgi.h>
+#include <audioclient.h>
 
 #define DLL_EXPORTS
 #ifdef DLL_EXPORTS
@@ -140,6 +141,7 @@ namespace Player
 	class Stream
 	{
 	public:
+		STREAM_DATA CreateWASAPIStream(FILE_DATA fileData, PCM_DATA pcmData, HWND hwnd);
 		STREAM_DATA CreateMMIOStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
 		STREAM_DATA CreateDirectSoundStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
 		VOID PlayBufferSound(STREAM_DATA streamData);

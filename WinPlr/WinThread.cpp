@@ -22,17 +22,8 @@ Player::ThreadSystem::ThCreateNewMutex(
 	LPCSTR lpName
 )
 {
-	HANDLE hMutex = CreateMutexA(
-		NULL,
-		FALSE,
-		lpName
-	);
-	if (!hMutex)
-	{
-		CreateErrorText(
-			"Error! Can't create mutex!"
-		);
-	}
+	HANDLE hMutex = CreateMutexA(NULL, FALSE, lpName);
+	DO_EXIT(hMutex, "Error! Can't create mutex!");
 	return hMutex;
 }
 
@@ -58,12 +49,7 @@ Player::ThreadSystem::ThCreateNewThread(
 		NULL,
 		&lpUserThreadID
 	);
-	if (!hThread)
-	{
-		CreateErrorText(
-			"Error! Can't create thread"
-		);
-	}
+	DO_EXIT(hThread, "Error! Can't create thread");
 	return lpUserThreadID;
 }
 
@@ -78,6 +64,7 @@ Player::ThreadSystem::ThSetNewThreadName(
 )
 {
 	THREAD_NAME stName;
+	ZeroMemory(&stName, sizeof(THREAD_NAME));
 	stName.dwType = 0x1000;
 	stName.dwThreadID = dwThreadID;
 	stName.dwFlags = NULL;
