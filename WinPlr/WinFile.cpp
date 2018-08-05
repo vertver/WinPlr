@@ -9,7 +9,6 @@
 * File-system for WinPlr
 *********************************************************/
 #include "WinAudio.h"
-Player::ErrorHandler hHand;
 
 /*************************************************
 * LoadFileToBuffer():
@@ -46,7 +45,7 @@ Player::Buffer::LoadFileToBuffer(
 	// if we can't open filedialog - exit
 	if (!GetOpenFileNameA(&oFN))
 	{
-		hHand.CreateInfoText("The file is empty.");
+		CreateInfoText("The file is empty.");
 		ExitProcess(FALSE);
 	}
 
@@ -61,10 +60,7 @@ Player::Buffer::LoadFileToBuffer(
 		NULL
 	);
 	// if we can't open file - exit
-	if (!hData)
-	{
-		hHand.CreateErrorText("Filesystem error! Can't find file!");
-	}
+	DO_EXIT(hData, "Filesystem error! Can't find file!");
 
 	// we must allocate our file to use it
 	DWORD dwSize = GetFileSize(hData, NULL);
@@ -72,15 +68,10 @@ Player::Buffer::LoadFileToBuffer(
 	DWORD dwSizeWritten = NULL;
 
 	// if we can't allocate - exit
-	if (!ReadFile(
-		hData,
-		lpData,
-		dwSize,
-		&dwSizeWritten,
-		NULL))
-	{
-		hHand.CreateErrorText("Filesystem error! Can't allocate pointer with data!");
-	}
+	DO_EXIT(
+		ReadFile(hData, lpData, dwSize, &dwSizeWritten, NULL),
+		"Filesystem error! Can't allocate pointer with data!"
+	);
 
 	// get params to our structs
 	dFile.dwSize = dwSizeWritten;

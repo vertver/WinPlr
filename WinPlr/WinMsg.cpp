@@ -15,7 +15,7 @@
 * Create message with warning and close process
 *************************************************/
 VOID 
-Player::ErrorHandler::CreateWarningText(
+CreateWarningText(
 	LPCSTR lpMsgText
 )
 {
@@ -36,12 +36,13 @@ Player::ErrorHandler::CreateWarningText(
 * Create message with error and close process
 *************************************************/
 VOID 
-Player::ErrorHandler::CreateErrorText(
+CreateErrorText(
 	LPCSTR lpMsgText
 )
 {
 	DWORD dwError = GetLastError();
 	LPSTR lpMessage = NULL;
+	LPCSTR lpCMessage = NULL;
 	std::string szString;
 
 	// if we got system error
@@ -57,14 +58,15 @@ Player::ErrorHandler::CreateErrorText(
 			NULL,
 			NULL
 		);
+		lpCMessage = lpMessage;
 	}
 	else
 	{
-		lpMessage = (LPSTR)"No error";
+		lpCMessage = "No error";
 	}
 
 	szString =
-		"#ERROR#" +
+		("#ERROR#" +
 		std::string("\n") +
 		PLAYER_VERSION +
 		std::string("\n") +
@@ -72,10 +74,8 @@ Player::ErrorHandler::CreateErrorText(
 		lpMsgText +
 		std::string("\n") +
 		std::string("#############################################\n") +
-		"#DESCRIPTION#\n" +
-		lpMessage +
 		std::string("\n") +
-		"Please, contact with creator to fix this problem";
+		"Please, contact with creator to fix this problem");
 
 	// display message with error string
 	MessageBoxA(
@@ -96,7 +96,7 @@ Player::ErrorHandler::CreateErrorText(
 * (HRESULT info)
 *************************************************/
 VOID
-Player::ErrorHandler::CreateErrorText(
+CreateErrorText(
 	LPCSTR lpMsgText,
 	HRESULT hr
 )
@@ -106,6 +106,7 @@ Player::ErrorHandler::CreateErrorText(
 	_com_error err(hr);
 	LPCSTR lpError = err.ErrorMessage();
 	LPSTR lpMessage = NULL;
+	LPCSTR lpCMessage = NULL;
 	std::string szString;
 
 	// if we got system error
@@ -121,11 +122,13 @@ Player::ErrorHandler::CreateErrorText(
 			NULL,
 			NULL
 		);
+		lpCMessage = lpMessage;
 	}
 	else
 	{
-		lpMessage = (LPSTR)"No error";
+		lpCMessage = "No error";
 	}
+
 	szString =
 		"#ERROR#" +
 		std::string("\n") +
@@ -136,9 +139,8 @@ Player::ErrorHandler::CreateErrorText(
 		std::string("\n") +
 		std::string("#############################################\n") +
 		"#DESCRIPTION#\n" +
-		lpError + std::string("(") + "HRESULT: " + std::to_string(hr) + std::string(")") +
-		"#WINDOWS ERROR#\n" +
-		lpMessage +
+		lpError + std::string("(") + "HRESULT: " + 
+		std::to_string(hr) + std::string(")") +
 		std::string("\n") +
 		"Please, contact with creator to fix this problem";
 
@@ -160,7 +162,7 @@ Player::ErrorHandler::CreateErrorText(
 * Create message with information
 *************************************************/
 VOID 
-Player::ErrorHandler::CreateInfoText(
+CreateInfoText(
 	LPCSTR lpMsgText
 )
 {
@@ -176,13 +178,13 @@ Player::ErrorHandler::CreateInfoText(
 }
 
 /*************************************************
-* ContinueIfYes:
+* ContinueIfYes():
 * Create message with switch case.
 * If pressed button yes - continue.
 * Else - break and exit
 *************************************************/
 VOID
-Player::ErrorHandler::ContinueIfYes(
+ContinueIfYes(
 	LPCSTR lpMsgText,
 	LPCSTR lpMsgTitle
 ) 

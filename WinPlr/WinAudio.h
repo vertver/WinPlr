@@ -31,8 +31,18 @@
 #define PLAYER_API decltype(dllimport)
 #endif
 
-#define _RELEASE(x) if(x) { x->Release(); } x = NULL;	// safety release pointers
-#define PLAYER_VERSION "#PLAYER_VERSION: 0.1.12#"
+VOID CreateErrorText(LPCSTR lpMsgText);
+VOID CreateErrorText(LPCSTR lpMsgText, HRESULT hr);
+VOID CreateInfoText(LPCSTR lpMsgText);
+VOID CreateWarningText(LPCSTR lpMsgText);
+VOID ContinueIfYes(LPCSTR lpMsgText, LPCSTR lpMsgTitle);
+
+LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+#define _RELEASE(x)			if (x)				{ x->Release(); } x = NULL;	// safety release pointers
+#define R_ASSERT2(x, y)		if (!SUCCEEDED(x))	{ CreateErrorText(y, x); }
+#define R_ASSERT(x)			if (!SUCCEEDED(x))	{ CreateErrorText("R_ASSERT"); }
+#define DO_EXIT(x, y)		if (!x)				{ CreateErrorText(y); }
+#define PLAYER_VERSION		"#PLAYER_VERSION: 0.1.13#"
 
 typedef enum
 {
@@ -61,14 +71,14 @@ typedef struct {
 	LPCSTR	lpName;				// thread name
 	DWORD	dwThreadID;			// id for thread
 	DWORD	dwFlags;			// flags to create thread
-} THREAD_NAME;
+} THREAD_NAME; 
 
 typedef struct
 {
 	LPVOID lpData;				// pointer to allocated memory
 	WORD wBitrate;				// bit rate of sample
 	WORD wChannels;				// count of channels
-	WORD wBits;					// 
+	WORD wBits;					// count of bits
 	BOOL bReorderChannels;		// if we need to reorder channels - get this
 	DWORD dwSamplerate;			// sample rate of sample
 	DWORD dwTime;				// durability of sample
@@ -111,6 +121,13 @@ typedef struct
 	BOOL bPlaying;										// display if audio now is playing
 } STREAM_DATA, *STREAM_DATA_P;
 
+typedef struct  
+{
+	HWND hwnd;					// hwnd for app
+	LPCSTR lpWindowName;		// title of window
+	HINSTANCE hInstance;		// hInstance
+} HWND_DATA, *HWND_DATA_P;
+
 namespace Player
 {
 	class Buffer
@@ -123,20 +140,11 @@ namespace Player
 	class Stream
 	{
 	public:
-		STREAM_DATA CreateSimpleStreamFromBuffer(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
+		STREAM_DATA CreateMMIOStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
 		STREAM_DATA CreateDirectSoundStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
 		VOID PlayBufferSound(STREAM_DATA streamData);
 		VOID StopBufferSound(STREAM_DATA streamData);
 		VOID ReleaseSoundBuffers(STREAM_DATA streamData);
-	};
-	class ErrorHandler
-	{
-	public:
-		VOID CreateErrorText(LPCSTR lpMsgText);
-		VOID CreateErrorText(LPCSTR lpMsgText, HRESULT hr);
-		VOID CreateInfoText(LPCSTR lpMsgText);
-		VOID CreateWarningText(LPCSTR lpMsgText);
-		VOID ContinueIfYes(LPCSTR lpMsgText, LPCSTR lpMsgTitle);
 	};
 	class ThreadSystem
 	{
@@ -144,6 +152,10 @@ namespace Player
 		HANDLE ThCreateNewMutex(LPCSTR lpName);
 		DWORD ThCreateNewThread(LPVOID lpFunc, HANDLE hMutex);
 		VOID ThSetNewThreadName(DWORD dwThreadID, LPCSTR lpName);
+	};
+	class Graphics
+	{
+	public:
 	};
 	class DirectGraphic
 	{
@@ -159,3 +171,4 @@ namespace Player
 		ID2D1SolidColorBrush *pBrush = NULL;
 	};
 }
+

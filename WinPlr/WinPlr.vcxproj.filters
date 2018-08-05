@@ -41,5 +41,11 @@
     <ClCompile Include="WinDirect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WinGraphic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinFileReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

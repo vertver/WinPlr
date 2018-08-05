@@ -11,7 +11,7 @@
 #include "WinAudio.h"
 
 HANDLE hAudioFile;
-Player::ErrorHandler hStreamErr;
+#define NOTIFIATINS_POSES 2
 
 /*************************************************
 * CreateStreamFromBuffer():
@@ -19,7 +19,7 @@ Player::ErrorHandler hStreamErr;
 * and PCM_DATA struct
 *************************************************/
 STREAM_DATA
-Player::Stream::CreateSimpleStreamFromBuffer(
+Player::Stream::CreateMMIOStream(
 	FILE_DATA dData,
 	PCM_DATA dPCM,
 	HWND hwnd
@@ -87,27 +87,27 @@ Player::Stream::CreateSimpleStreamFromBuffer(
 	switch (uWave)
 	{
 	case MMSYSERR_ALLOCATED:
-		hStreamErr.CreateWarningText(
+		CreateWarningText(
 			"Warning! Current resource is already allocated"
 		);
 		break;
 	case MMSYSERR_BADDEVICEID:
-		hStreamErr.CreateErrorText(
+		CreateErrorText(
 			"Stream error! Bad device"
 		);
 		break;
 	case MMSYSERR_NODRIVER:
-		hStreamErr.CreateErrorText(
+		CreateErrorText(
 			"Stream error! No driver detected"
 		);
 		break;
 	case MMSYSERR_NOMEM:
-		hStreamErr.CreateErrorText(
+		CreateErrorText(
 			"Stream error! Unnable to allocate (memory error)"
 		);
 		break;
 	case WAVERR_BADFORMAT:
-		hStreamErr.CreateErrorText(
+		CreateErrorText(
 			"Stream error! Unsupported handle (!wave)"
 		);
 		break;
@@ -140,6 +140,7 @@ Player::Stream::CreateDirectSoundStream(
 	STREAM_DATA streamData = {};
 	DSBUFFERDESC bufferDesc = {};
 	WAVEFORMATEX waveFormat = {};
+	HRESULT hr= NULL;
 	LPDIRECTSOUNDBUFFER tempBuffer = {};
 	streamData.bPlaying = FALSE;	// make true before init
 	streamData.dPCM = dPCM;
@@ -150,17 +151,14 @@ Player::Stream::CreateDirectSoundStream(
 		&streamData.lpDirectSound,
 		NULL)))
 	{
-		hStreamErr.CreateErrorText(
+		CreateErrorText(
 			"Failed to create sound device (DirectSound). Check your audio drivers\nor restart with '-no_direct_sound' argument'."
 		);
 	}
 
 	// set the cooperative level
-	HRESULT hr = streamData.lpDirectSound->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Failed to set cooperative level (DirectSound)", hr);
-	}
+	hr = streamData.lpDirectSound->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
+	R_ASSERT2(hr, "Failed to set cooperative level (DirectSound)");
 
 	// create device caps
 	DSCAPS dsCaps;
@@ -168,10 +166,7 @@ Player::Stream::CreateDirectSoundStream(
 
 	// get device caps for direct sound pointer
 	hr = streamData.lpDirectSound->GetCaps(&dsCaps);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Stream error! Can't get device caps (DirectSound)", hr);
-	}
+	R_ASSERT2(hr, "Stream error! Can't get device caps (DirectSound)");
 
 	// set parameters for primary buffer
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
@@ -186,10 +181,7 @@ Player::Stream::CreateDirectSoundStream(
 		&streamData.lpPrimaryDirectBuffer,
 		NULL
 	);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Stream error! Can't create primary sound buffer (DirectSound)", hr);
-	}
+	R_ASSERT2(hr, "Stream error! Can't create primary sound buffer (DirectSound)");
 
 	waveFormat.nSamplesPerSec = dPCM.dwSamplerate;
 	waveFormat.wBitsPerSample = dPCM.wBits;
@@ -238,10 +230,10 @@ Player::Stream::CreateDirectSoundStream(
 
 	// set the primary buffer to be the wave format specified.
 	hr = streamData.lpPrimaryDirectBuffer->SetFormat(&waveFormat);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Stream error! Can't set wave format for sound buffer (DirectSound)", hr);
-	}
+	R_ASSERT2(
+		hr,
+		"Stream error! Can't set wave format for sound buffer (DirectSound)"
+	);
 
 	// set parameters for secondary buffer
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
@@ -257,20 +249,20 @@ Player::Stream::CreateDirectSoundStream(
 		&tempBuffer,
 		NULL
 	);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Stream error! Can't create temp sound buffer (DirectSound)", hr);
-	}
+	R_ASSERT2(
+		hr,
+		"Stream error! Can't create temp sound buffer (DirectSound)"
+	);
 
 	// create query interface
 	hr = tempBuffer->QueryInterface(
 		IID_IDirectSoundBuffer,
 		(LPVOID*)&streamData.lpSecondaryDirectBuffer
 	);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Stream error! Can't query sound interface (DirectSound)", hr);
-	}
+	R_ASSERT2(
+		hr,
+		"Stream error! Can't query sound interface (DirectSound)"
+	);
 
 	// free temp buffer
 	_RELEASE(tempBuffer);
@@ -283,16 +275,13 @@ Player::Stream::CreateDirectSoundStream(
 	hr = streamData.lpSecondaryDirectBuffer->Lock(
 		NULL,
 		dData.dwSize,
-		(void**)&pBuffer,
+		(LPVOID*)&pBuffer,
 		(DWORD*)&dwBufferSize,
 		NULL,
 		NULL,
 		NULL
 	);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Stream error! Can't lock buffer (DirectSound)", hr);
-	}
+	R_ASSERT2(hr, "Stream error! Can't lock buffer (DirectSound)");
 
 	memcpy(pBuffer, dPCM.lpData, dData.dwSize);
 
@@ -303,10 +292,7 @@ Player::Stream::CreateDirectSoundStream(
 		NULL,
 		NULL
 	);
-	if (!SUCCEEDED(hr))
-	{
-		hStreamErr.CreateErrorText("Stream error! Can't unlock buffer (DirectSound)", hr);
-	}
+	R_ASSERT2(hr, "Stream error! Can't unlock buffer (DirectSound)");
 
 	// delete buffer
 	delete[] waveData;
@@ -327,16 +313,13 @@ Player::Stream::PlayBufferSound(
 	HRESULT hr;
 
 	// if secondary buffer is not empty - use DirectSound
-	if (streamData.lpSecondaryDirectBuffer && streamData.lpPrimaryDirectBuffer)
+	if (streamData.lpSecondaryDirectBuffer)
 	{
 		// play sound
 		hr = streamData.lpSecondaryDirectBuffer->SetCurrentPosition(NULL);
-		hr = streamData.lpSecondaryDirectBuffer->SetVolume(DSBVOLUME_MAX);
+		hr = streamData.lpSecondaryDirectBuffer->SetVolume(-2000);
 		hr = streamData.lpSecondaryDirectBuffer->Play(NULL, NULL, NULL);
-		if (!SUCCEEDED(hr))
-		{
-			hStreamErr.CreateErrorText("Stream error! Can't start playing", hr);
-		}
+		R_ASSERT2(hr, "Stream error! Can't start playing");
 		streamData.bPlaying = TRUE;
 	}
 }
@@ -353,11 +336,8 @@ Player::Stream::StopBufferSound(
 	HRESULT hr;
 	if (streamData.lpSecondaryDirectBuffer)
 	{
-		hr = streamData.lpSecondaryDirectBuffer->Stop();
-		if (!SUCCEEDED(hr))
-		{
-			hStreamErr.CreateErrorText("Stream error! Can't stop playing", hr);
-		}
+		hr = SUCCEEDED(streamData.lpSecondaryDirectBuffer->Stop());
+		R_ASSERT2(hr, "Stream error! Can't stop playing");
 	}
 	streamData.bPlaying = FALSE;
 }

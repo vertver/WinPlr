@@ -164,6 +164,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinDirect.cpp" />
+    <ClCompile Include="WinFileReader.cpp" />
+    <ClCompile Include="WinGraphic.cpp" />
     <ClCompile Include="WinMsg.cpp" />
     <ClCompile Include="WinThread.cpp" />
     <ClCompile Include="WinStream.cpp" />

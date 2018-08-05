@@ -11,7 +11,6 @@
 
 #include "WinAudio.h"
 
-Player::ErrorHandler hErr;
 
 /*************************************************
 * ThCreateNewMutex():
@@ -30,7 +29,7 @@ Player::ThreadSystem::ThCreateNewMutex(
 	);
 	if (!hMutex)
 	{
-		hErr.CreateErrorText(
+		CreateErrorText(
 			"Error! Can't create mutex!"
 		);
 	}
@@ -61,7 +60,7 @@ Player::ThreadSystem::ThCreateNewThread(
 	);
 	if (!hThread)
 	{
-		hErr.CreateErrorText(
+		CreateErrorText(
 			"Error! Can't create thread"
 		);
 	}
