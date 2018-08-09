@@ -75,19 +75,31 @@ CreateErrorText(
 		std::string("\n") +
 		std::string("#############################################\n") +
 		std::string("\n") +
-		"Please, contact with creator to fix this problem");
+		"Do you wand to break program? Press 'yes' if want, or 'no' if don't.");
 
 	// display message with error string
-	MessageBoxA(
+	int msg = MessageBoxA(
 		NULL,
 		szString.c_str(),
 		"Error",
-		MB_OK |
+		MB_YESNOCANCEL |
 		MB_ICONHAND
 	);
-	__debugbreak();
-	ExitProcess(TRUE);
-	// if error - TRUE
+
+	switch (msg)
+	{
+	case IDYES:	
+		// if error - TRUE
+		__debugbreak();
+		ExitProcess(TRUE);
+		break;
+	case IDCANCEL:
+	case IDNO:
+	default:
+		break;
+	}
+
+
 }
 
 /*************************************************
@@ -139,22 +151,32 @@ CreateErrorText(
 		std::string("\n") +
 		std::string("#############################################\n") +
 		"#DESCRIPTION#\n" +
-		lpError + std::string("(") + "HRESULT: " + 
+		lpError + std::string("(") + "HRESULT: " +
 		std::to_string(hr) + std::string(")") +
 		std::string("\n") +
-		"Please, contact with creator to fix this problem";
+		"Do you wand to break program? Press 'yes' if want, or 'no' if don't.";
 
 	// display message with error string
-	MessageBoxA(
+	int msg = MessageBoxA(
 		NULL,
 		szString.c_str(),
 		"Error",
-		MB_OK |
+		MB_YESNOCANCEL |
 		MB_ICONHAND
 	);
-	__debugbreak();
-	ExitProcess(TRUE);
-	// if error - TRUE
+
+	switch (msg)
+	{
+	case IDCANCEL:
+	case IDYES:
+		// if error - TRUE
+		__debugbreak();
+		ExitProcess(TRUE);
+		break;
+	case IDNO:
+	default:
+		break;
+	}
 }
 
 /*************************************************

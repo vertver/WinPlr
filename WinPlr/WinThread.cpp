@@ -10,48 +10,7 @@
 *********************************************************/
 
 #include "WinAudio.h"
-
-
-/*************************************************
-* ThCreateNewMutex():
-* Create mutex with user name and 
-* return itself
-*************************************************/
-HANDLE 
-Player::ThreadSystem::ThCreateNewMutex(
-	LPCSTR lpName
-)
-{
-	HANDLE hMutex = CreateMutexA(NULL, FALSE, lpName);
-	DO_EXIT(hMutex, "Error! Can't create mutex!");
-	return hMutex;
-}
-
-/*************************************************
-* ThCreateNewThread:
-* Create thread with user method and 
-* return thread id
-*************************************************/
-DWORD 
-Player::ThreadSystem::ThCreateNewThread(
-	LPVOID lpFunc,
-	HANDLE hMutex
-)
-{
-	DWORD lpUserThreadID = NULL;
-
-	// create window thread
-	HANDLE hThread = CreateThread(
-		NULL,
-		NULL,
-		(LPTHREAD_START_ROUTINE)lpFunc,
-		hMutex,
-		NULL,
-		&lpUserThreadID
-	);
-	DO_EXIT(hThread, "Error! Can't create thread");
-	return lpUserThreadID;
-}
+#include "WinXAudio.h"
 
 /*************************************************
 * ThSetNewThreadName:
@@ -84,4 +43,17 @@ Player::ThreadSystem::ThSetNewThreadName(
 	__except (EXCEPTION_CONTINUE_EXECUTION) 
 	{
 	}
+}
+
+
+/*************************************************
+* ThBeginXAudioThread:
+* Create new thread with XAudio2 methods
+*************************************************/
+VOID 
+Player::ThreadSystem::ThBeginXAudioThread(
+	AUDIO_FILE audioFile
+)
+{
+	_beginthread((_beginthread_proc_type)CreateXAudioThread, NULL, &audioFile);
 }

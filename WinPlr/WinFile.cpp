@@ -9,6 +9,7 @@
 * File-system for WinPlr
 *********************************************************/
 #include "WinAudio.h"
+#include "WinFileReader.h"
 
 /*************************************************
 * LoadFileToBuffer():
@@ -84,15 +85,20 @@ Player::Buffer::LoadFileToBuffer(
 	dFile.hFile = hData;
 	dFile.lpFile = lpData;
 
-	dPCM.bWindows = TRUE;		// WINAPI methods play audio
-	dPCM.dwSamplerate = 44100;
-	dPCM.wBitrate = 16;
-	dPCM.wBits = 16;
-	dPCM.dwTime = 10000;		// 10000 msecs - 10 secs
+	CloseHandle(hData);
+
+	// 
+	FileReader fReader;
+	PCM_DATA fileType = fReader.GetFullFileInfo(oFN.lpstrFile);
+
+	dPCM.bWindows = TRUE;						// WINAPI methods play audio
+	dPCM.dwSamplerate = fileType.dwSamplerate;
+	dPCM.wBitrate = fileType.wBitrate;
+	dPCM.dwTime = 10000;						// 10000 msecs - 10 secs
 	dPCM.lpData = lpData;
 	dPCM.lpName = oFN.lpstrFileTitle;
 	dPCM.lpPath = oFN.lpstrFile;
-	dPCM.wChannels = 2;
+	dPCM.wChannels = fileType.wChannels;
 
 	dFFT.lpData = lpData;
 	dFFT.dwSizeBuffer = 1024;

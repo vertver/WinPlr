@@ -3,10 +3,19 @@
 * WinPlr - open-source WINAPI audio player.
 * MIT-License
 **********************************************************
-* Module Name: WinAudio graphic part
+* Module Name: WinAudio file-reader header
 **********************************************************
-* WinFile.cpp
-* Graphic part for WinPlr
+* WinFileReader.h
+* File type checking
 *********************************************************/
-
+#pragma once
 #include "WinAudio.h"
+
+class FileReader
+{
+public:
+	FILE_TYPE GetFullFileType(LPCSTR lpString);
+	PCM_DATA GetFullFileInfo(LPCSTR lpPath);
+	VOID ReadChunks();
+};
+

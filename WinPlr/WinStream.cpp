@@ -33,7 +33,7 @@ Player::Stream::CreateMMIOStream(
 	WAVEFORMATEX waveFormat = {};
 	ZeroMemory(&waveFormat, sizeof(WAVEFORMATEX));
 	waveFormat.nSamplesPerSec = streamData.dPCM.dwSamplerate;
-	waveFormat.wBitsPerSample = streamData.dPCM.wBits;
+	waveFormat.wBitsPerSample = streamData.dPCM.wBitrate;
 	waveFormat.nChannels = streamData.dPCM.wChannels;
 	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
 	waveFormat.cbSize = NULL;
@@ -85,73 +85,6 @@ Player::Stream::CreateMMIOStream(
 	streamData.lpPrimaryDirectBuffer = NULL;
 	streamData.lpSecondaryDirectBuffer = NULL;
 	return streamData;
-}
-
-/*************************************************
-* CreateWASAPIStream():
-* Create WASAPI stream from user data
-*************************************************/
-STREAM_DATA
-Player::Stream::CreateWASAPIStream(
-	FILE_DATA fileData,
-	PCM_DATA pcmData,
-	HWND hwnd
-)
-{
-	Player::ThreadSystem threadSystem;
-	STREAM_DATA streamData;
-	ZeroMemory(&streamData, sizeof(STREAM_DATA));
-	streamData.dPCM = pcmData;
-
-	// create wave callback
-	WAVEFORMATEX waveFormat = {};
-	ZeroMemory(&waveFormat, sizeof(WAVEFORMATEX));
-	waveFormat.nSamplesPerSec = streamData.dPCM.dwSamplerate;
-	waveFormat.wBitsPerSample = streamData.dPCM.wBits;
-	waveFormat.nChannels = streamData.dPCM.wChannels;
-	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
-	waveFormat.cbSize = NULL;
-
-	// check for current format
-	switch (fileData.eType)
-	{
-	case WAV_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_PCM;
-		waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
-		break;
-	case ALAC_FILE:
-	case FLAC_FILE:
-	case MPEG3_FILE:
-	case MPEG4_FILE:
-	case OGG_FILE:
-	case OPUS_FILE:
-	case MPEG2_FILE:
-	case AIF_FILE:
-	case UNKNOWN_FILE:
-	default:
-		waveFormat.wFormatTag = WAVE_FORMAT_UNKNOWN;
-		break;
-	}
-
-	// open default wave out
-	MMRESULT uWave = waveOutOpen(
-		NULL,
-		WAVE_MAPPER,
-		&waveFormat,
-		NULL,
-		NULL,
-		CALLBACK_THREAD
-	);
-	switch (uWave)
-	{
-	case MMSYSERR_ALLOCATED:	CreateWarningText("Warning! Current resource is already allocated");	break;
-	case MMSYSERR_BADDEVICEID:	CreateErrorText("Stream error! Bad device");							break;
-	case MMSYSERR_NODRIVER:		CreateErrorText("Stream error! No driver detected");					break;
-	case MMSYSERR_NOMEM:		CreateErrorText("Stream error! Unnable to allocate (memory error)");	break;
-	case WAVERR_BADFORMAT:		CreateErrorText("Stream error! Unsupported handle (!wave)");			break;
-	case WAVERR_SYNC:			__debugbreak();
-	case MMSYSERR_NOERROR:		default:			break;
-	}
 }
 
 /*************************************************
@@ -218,7 +151,7 @@ Player::Stream::CreateDirectSoundStream(
 	R_ASSERT2(hr, "Stream error! Can't create primary sound buffer (DirectSound)");
 
 	waveFormat.nSamplesPerSec = dPCM.dwSamplerate;
-	waveFormat.wBitsPerSample = dPCM.wBits;
+	waveFormat.wBitsPerSample = dPCM.wBitrate;
 	waveFormat.nChannels = dPCM.wChannels;
 	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
 	waveFormat.cbSize = NULL;
@@ -264,10 +197,7 @@ Player::Stream::CreateDirectSoundStream(
 
 	// set the primary buffer to be the wave format specified.
 	hr = streamData.lpPrimaryDirectBuffer->SetFormat(&waveFormat);
-	R_ASSERT2(
-		hr,
-		"Stream error! Can't set wave format for sound buffer (DirectSound)"
-	);
+	R_ASSERT2(hr, "Stream error! Can't set wave format for sound buffer (DirectSound)");
 
 	// set parameters for secondary buffer
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
@@ -283,20 +213,14 @@ Player::Stream::CreateDirectSoundStream(
 		&tempBuffer,
 		NULL
 	);
-	R_ASSERT2(
-		hr,
-		"Stream error! Can't create temp sound buffer (DirectSound)"
-	);
+	R_ASSERT2(hr, "Stream error! Can't create temp sound buffer (DirectSound)");
 
 	// create query interface
 	hr = tempBuffer->QueryInterface(
 		IID_IDirectSoundBuffer,
 		(LPVOID*)&streamData.lpSecondaryDirectBuffer
 	);
-	R_ASSERT2(
-		hr,
-		"Stream error! Can't query sound interface (DirectSound)"
-	);
+	R_ASSERT2(hr, "Stream error! Can't query sound interface (DirectSound)");
 
 	// free temp buffer
 	_RELEASE(tempBuffer);

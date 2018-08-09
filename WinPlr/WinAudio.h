@@ -15,6 +15,7 @@
 #include <dsound.h>			// for DirectSound
 #include <mmreg.h>
 #include <mmeapi.h>
+#include <VersionHelpers.h>
 #include <mmdeviceapi.h>	// minimal MME API
 #include <ks.h>
 #include <ksmedia.h>
@@ -23,7 +24,9 @@
 #include <strsafe.h>
 #include <d2d1_3.h>
 #include <dxgi.h>
-#include <audioclient.h>
+#include <xaudio2.h>
+#include <stdio.h>
+#include <process.h>
 
 #define DLL_EXPORTS
 #ifdef DLL_EXPORTS
@@ -31,6 +34,9 @@
 #else
 #define PLAYER_API decltype(dllimport)
 #endif
+
+template<typename T> T freadNum(FILE* f);
+std::string freadStr(FILE* f, size_t len);
 
 VOID CreateErrorText(LPCSTR lpMsgText);
 VOID CreateErrorText(LPCSTR lpMsgText, HRESULT hr);
@@ -42,8 +48,9 @@ LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 #define _RELEASE(x)			if (x)				{ x->Release(); } x = NULL;	// safety release pointers
 #define R_ASSERT2(x, y)		if (!SUCCEEDED(x))	{ CreateErrorText(y, x); }
 #define R_ASSERT(x)			if (!SUCCEEDED(x))	{ CreateErrorText("R_ASSERT"); }
-#define DO_EXIT(x, y)		if (!x)				{ CreateErrorText(y); }
-#define PLAYER_VERSION		"#PLAYER_VERSION: 0.1.13#"
+#define ASSERT(x, y)		if (!x)				{ OutputDebugStringA(y); OutputDebugStringA("\n");}
+#define DO_EXIT(x, y)		if (!(x))				{ CreateErrorText(y); }
+#define PLAYER_VERSION		"#PLAYER_VERSION: 0.1.15#"
 
 typedef enum
 {
@@ -79,7 +86,7 @@ typedef struct
 	LPVOID lpData;				// pointer to allocated memory
 	WORD wBitrate;				// bit rate of sample
 	WORD wChannels;				// count of channels
-	WORD wBits;					// count of bits
+	BOOL isFloat;				// IEEE or PCM
 	BOOL bReorderChannels;		// if we need to reorder channels - get this
 	DWORD dwSamplerate;			// sample rate of sample
 	DWORD dwTime;				// durability of sample
@@ -115,10 +122,10 @@ typedef struct
 typedef struct
 {
 	PCM_DATA dPCM;										// all PCM data for DirectSound
-	LPDIRECTSOUND lpDirectSound = NULL;					// DirectSound main object
-	LPDIRECTSOUNDBUFFER lpPrimaryDirectBuffer = NULL;	// DirectSound buffer
-	LPDIRECTSOUNDBUFFER lpSecondaryDirectBuffer = NULL;	// DirectSound buffer
-	LPDIRECTSOUNDNOTIFY lpDirectNotify = NULL;			// DirectSound notify
+	LPDIRECTSOUND lpDirectSound;						// DirectSound main object
+	LPDIRECTSOUNDBUFFER lpPrimaryDirectBuffer;			// DirectSound buffer
+	LPDIRECTSOUNDBUFFER lpSecondaryDirectBuffer;		// DirectSound buffer
+	LPDIRECTSOUNDNOTIFY lpDirectNotify;					// DirectSound notify
 	BOOL bPlaying;										// display if audio now is playing
 } STREAM_DATA, *STREAM_DATA_P;
 
@@ -128,6 +135,13 @@ typedef struct
 	LPCSTR lpWindowName;		// title of window
 	HINSTANCE hInstance;		// hInstance
 } HWND_DATA, *HWND_DATA_P;
+
+typedef struct
+{
+	FILE_DATA dData;			// file data struct
+	PCM_DATA dPCM;				// PCM data struct
+} AUDIO_FILE;
+
 
 namespace Player
 {
@@ -141,7 +155,6 @@ namespace Player
 	class Stream
 	{
 	public:
-		STREAM_DATA CreateWASAPIStream(FILE_DATA fileData, PCM_DATA pcmData, HWND hwnd);
 		STREAM_DATA CreateMMIOStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
 		STREAM_DATA CreateDirectSoundStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
 		VOID PlayBufferSound(STREAM_DATA streamData);
@@ -151,26 +164,11 @@ namespace Player
 	class ThreadSystem
 	{
 	public:
-		HANDLE ThCreateNewMutex(LPCSTR lpName);
-		DWORD ThCreateNewThread(LPVOID lpFunc, HANDLE hMutex);
 		VOID ThSetNewThreadName(DWORD dwThreadID, LPCSTR lpName);
+		VOID ThBeginXAudioThread(AUDIO_FILE audioFile);
 	};
 	class Graphics
 	{
 	public:
 	};
-	class DirectGraphic
-	{
-	public:
-		VOID SetDirectWindow(HWND hwnd, int x, int y);
-	protected:
-		ID2D1Factory* pD2DFactory = NULL;
-		ID2D1Device* pD2DDevice = NULL;
-		
-		ID2D1DeviceContext* pD2DContext	= NULL;
-		ID2D1HwndRenderTarget* pRT = NULL;
-		ID2D1Bitmap* pD2DRenderTargets[2];
-		ID2D1SolidColorBrush *pBrush = NULL;
-	};
 }
-

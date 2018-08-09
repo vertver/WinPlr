@@ -21,6 +21,12 @@
     <ClInclude Include="WinAudio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WinXAudio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinFileReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinPlr.cpp">
@@ -38,13 +44,10 @@
     <ClCompile Include="WinMsg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WinDirect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WinGraphic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WinFileReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinXAudio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
