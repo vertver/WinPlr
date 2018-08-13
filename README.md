@@ -1,11 +1,12 @@
 # WinPlr - Open-source WINAPI Player 
-with extremely size (<200kb).
+with extremely small size (<200kb).
 
 ![window example](https://github.com/Vertver/WinPlr/blob/master/WinPlr%20main%20window.png)
 
 Download latest release at [here](https://github.com/Vertver/WinPlr/releases)
 
 *Minimal supported Windows version:* Windows 2000 SP3
+
 *Recommended Windows version:* Windows 7 SP1 or greater
 
 # What can WinPlr do?
@@ -21,3 +22,11 @@ It's сan play .wav files by XAudio2 and DirectSound interfaces.
 # Support project
 
 You can support this project by star this repository. If you have issue, you can ask it at "Issues" tab.
+
+# Thanks for
+
+[Frowrik (Help with code)](https://github.com/frowrik)
+
+[Vurtun (Nuklear library)](https://github.com/vurtun) - Nuklear
+
+And for everyone who help me to make this project
