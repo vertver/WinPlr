@@ -1,7 +1,7 @@
 # WinPlr - Open-source WINAPI Player 
 with extremely size (<200kb).
 
-[window example](https://github.com/Vertver/WinPlr/blob/master/WinPlr%20main%20window.png)
+![window example](https://github.com/Vertver/WinPlr/blob/master/WinPlr%20main%20window.png)
 
 Download latest release at [here](https://github.com/Vertver/WinPlr/releases)
 
