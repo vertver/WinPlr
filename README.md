@@ -1,7 +1,7 @@
 # WinPlr - Open-source WINAPI Player 
 with extremely size (<100kb).
 
-Download latest release at [here](https://github.com/Vertver/WinPlr/releases "WinPlr Releases)
+Download latest release at [here](https://github.com/Vertver/WinPlr/releases)
 
 *Minimal supported Windows version:* Windows 2000 SP3
 *Recommended Windows version:* Windows 7 SP1 or greater
