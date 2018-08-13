@@ -53,10 +53,10 @@ ReadFmtChunk(
 )
 {
 	WORD dwSampleBits = NULL;
-	DO_EXIT(uChunkLen >= 16, "Error type");
+	DO_EXIT(uChunkLen >= 16, "Bad file Error: no chunk length");
 
 	WORD fmttag = freadNum<WORD>(fileData);
-	DO_EXIT(fmttag == 1 || fmttag == 3, "Error");	// IEEE or PCM
+	DO_EXIT(fmttag == 1 || fmttag == 3, "Bad file Error: No wave type");	// IEEE or PCM
 
 	// check for FMT tag
 	switch (fmttag)
@@ -71,12 +71,12 @@ ReadFmtChunk(
 
 	// check channels
 	WORD wChannels = freadNum<WORD>(fileData);
-	DO_EXIT(wChannels > 0, "No channels");
+	DO_EXIT(wChannels > 0, "Bad file Error: No channels");
 	pcmData.wChannels = wChannels;
 
 	// check sample rate
 	UINT dwSampleRate = freadNum<UINT>(fileData);
-	DO_EXIT(dwSampleRate > 0, "No sample rate");
+	DO_EXIT(dwSampleRate > 0, "Bad file Error: No sample rate");
 	pcmData.dwSamplerate = dwSampleRate;
 
 	// byte and bitrate
@@ -88,8 +88,8 @@ ReadFmtChunk(
 	WORD wBytes = wBits / 8;
 
 	// compare all data
-	DO_EXIT(dwByteRate == dwSampleRate * wChannels * wBytes, "Error types");
-	DO_EXIT(wBlockAlign == wChannels * wBytes, "Error block align");
+	DO_EXIT(dwByteRate == dwSampleRate * wChannels * wBytes, "Bad file Error: Error types");
+	DO_EXIT(wBlockAlign == wChannels * wBytes, "Bad file Error: Error block align");
 
 	// 1: PCM  - int
 	// 3: IEEE - float
@@ -105,14 +105,14 @@ ReadFmtChunk(
 	}
 	else
 	{
-		DO_EXIT(fmttag == 3, "No type");
-		DO_EXIT(wBits == 32, "No type");
+		DO_EXIT(fmttag == 3, "Bad file Error: No type");
+		DO_EXIT(wBits == 32, "Bad file Error: No type");
 	}
 	if (uChunkLen > 16)
 	{
 		// compare with extented size
 		WORD dwExtentedSize = freadNum<WORD>(fileData);
-		DO_EXIT(uChunkLen == 18 + dwExtentedSize, "No chunk len");
+		DO_EXIT(uChunkLen == 18 + dwExtentedSize, "Bad file Error: No chunk length");
 		fseek(fileData, dwExtentedSize, SEEK_CUR);
 	}
 
@@ -132,7 +132,7 @@ FileReader::GetFullFileType(
 {
 	// open file with "read-only" rools
 	fileData = fopen(lpString, "r");
-	DO_EXIT(fileData, "Can't open file");
+	DO_EXIT(fileData, "Can't open file (The path is wrong or file handle is busy)");
 
 	// if file is WAVE PCM - return
 	if (freadStr(fileData, 4) == "RIFF")
@@ -166,26 +166,34 @@ FileReader::ReadChunks()
 		else if (chunkName == "data") break;	// else break cycle
 		else
 		{
-			DO_EXIT((fseek(fileData, chunkLen, SEEK_CUR) == NULL), "Can't seek file");		// skip chunk
+			ASSERT((fseek(fileData, chunkLen, SEEK_CUR) == NULL), "Can't seek file");		// skip chunk
 		}
 	}
 }
 
 /***********************************************
 * GetFullFileInfo():
-* returnt full info about audiofile
+* return full info about audiofile
 ***********************************************/
 PCM_DATA 
-FileReader::GetFullFileInfo(LPCSTR lpPath)
+FileReader::GetFullFileInfo(
+	LPCSTR lpPath
+)
 {
-	FILE_TYPE eType;
+	FILE_TYPE eType = {};
+	ZeroMemory(&eType, sizeof(FILE_TYPE));
+
+	// Getting full information about file
 	eType = GetFullFileType(lpPath);
+
+	// if file include all RIFF information - read it chunks
 	if (eType == WAV_FILE)
 	{
 		ReadChunks();
 		free(fileData);
 		return pcmData;
 	}
+
 	DO_EXIT(eType, "Can't check format");
 	return pcmData;
 }

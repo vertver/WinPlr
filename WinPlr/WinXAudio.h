@@ -29,6 +29,8 @@ VOID WINAPIV CreateXAudioThread(AUDIO_FILE* xAudioFile);
 class XAudioPlayer
 {
 public:
+
+
 	XAUDIO_DATA CreateXAudioDevice(FILE_DATA dData, PCM_DATA dPCM);
-	XAUDIO_DATA CreateXAudioState(XAUDIO_DATA audioStruct);
+	VOID CreateXAudioState(XAUDIO_DATA audioStruct);
 };

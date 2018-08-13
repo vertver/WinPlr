@@ -44,13 +44,17 @@ VOID CreateInfoText(LPCSTR lpMsgText);
 VOID CreateWarningText(LPCSTR lpMsgText);
 VOID ContinueIfYes(LPCSTR lpMsgText, LPCSTR lpMsgTitle);
 
-LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-#define _RELEASE(x)			if (x)				{ x->Release(); } x = NULL;	// safety release pointers
-#define R_ASSERT2(x, y)		if (!SUCCEEDED(x))	{ CreateErrorText(y, x); }
-#define R_ASSERT(x)			if (!SUCCEEDED(x))	{ CreateErrorText("R_ASSERT"); }
-#define ASSERT(x, y)		if (!x)				{ OutputDebugStringA(y); OutputDebugStringA("\n");}
+#define DEBUG_MESSAGE(x)	OutputDebugStringA(x); OutputDebugStringA("\n");
+#define _RELEASE(x)			if (x)					{ x->Release(); x = NULL; }	// safety release pointers
+#define R_ASSERT2(x, y)		if (!SUCCEEDED(x))		{ CreateErrorText(y, x); }
+#define R_ASSERT(x)			if (!SUCCEEDED(x))		{ CreateErrorText("R_ASSERT"); }
+#ifndef DEBUG
+#define ASSERT(x, y)		if (!x)					{ OutputDebugStringA(y); OutputDebugStringA("\n");}
+#else
+#define ASSERT(x, y)		if (!x)					{ OutputDebugStringA(y); OutputDebugStringA("\n"); __debugbreak();}
+#endif
 #define DO_EXIT(x, y)		if (!(x))				{ CreateErrorText(y); }
-#define PLAYER_VERSION		"#PLAYER_VERSION: 0.1.15#"
+#define PLAYER_VERSION		"#PLAYER_VERSION: 0.1.16#"
 
 typedef enum
 {
@@ -103,17 +107,8 @@ typedef struct
 	FILE_TYPE eType;			// type of file
 } FILE_DATA, *FILE_DATA_P;
 
-typedef struct
-{
-	LPVOID lpData;				// pointer to allocated memory
-	DWORD dwSizeWindow;			// size of window
-	DWORD dwSizeBuffer;			// size of buffer
-	WINDOW_TYPE eType;			// type of window
-} FFT_DATA, *FFT_DATA_P;
-
 typedef struct  
 {
-	FFT_DATA dFFT;				// FFT structure data
 	FILE_DATA dData;			// FILE structure data
 	PCM_DATA dPCM;				// PCM structure data
 	HWND hwnd;					// HWND handle
@@ -140,7 +135,7 @@ typedef struct
 {
 	FILE_DATA dData;			// file data struct
 	PCM_DATA dPCM;				// PCM data struct
-} AUDIO_FILE;
+} AUDIO_FILE, *AUDIO_FILE_P;
 
 
 namespace Player
@@ -148,8 +143,7 @@ namespace Player
 	class Buffer
 	{
 	public:
-		HANDLE_DATA LoadFileToBuffer(HWND hwnd, HANDLE hData, FILE_DATA pFile, PCM_DATA pPCM, FFT_DATA pFFT);
-		VOID UnloadFileFromBuffer(HANDLE_DATA hdData);
+		HANDLE_DATA LoadFileToBuffer(HWND hwnd, HANDLE hData, FILE_DATA dFile, PCM_DATA dPCM);
 		BOOL CheckBufferFile(HANDLE_DATA hdData);
 	};
 	class Stream
@@ -164,7 +158,8 @@ namespace Player
 	class ThreadSystem
 	{
 	public:
-		VOID ThSetNewThreadName(DWORD dwThreadID, LPCSTR lpName);
+		VOID ThSetNewThreadName(LPCSTR lpName);
+		BOOL ThSetNewWin10ThreadName(LPCWSTR lpName);
 		VOID ThBeginXAudioThread(AUDIO_FILE audioFile);
 	};
 	class Graphics

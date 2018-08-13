@@ -13,42 +13,183 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Nuklear">
+      <UniqueIdentifier>{0241228d-4a0a-41b8-9241-093249f1f7e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WinPlr">
+      <UniqueIdentifier>{c3af12d9-4161-412f-8927-837e010b2c91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\WinPlr">
+      <UniqueIdentifier>{b95b2b87-bf7b-429f-9311-0657a0288515}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Nuklear">
+      <UniqueIdentifier>{da027c7e-a0c2-43f1-92ba-a5934f930848}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="WinAudio.h">
+      <Filter>Header Files\WinPlr</Filter>
+    </ClInclude>
+    <ClInclude Include="WinFileReader.h">
+      <Filter>Header Files\WinPlr</Filter>
+    </ClInclude>
+    <ClInclude Include="WinXAudio.h">
+      <Filter>Header Files\WinPlr</Filter>
+    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WinAudio.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\Nuklear\nuklear\nuklear.h">
+      <Filter>Header Files\Nuklear</Filter>
     </ClInclude>
-    <ClInclude Include="WinXAudio.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\Nuklear\nuklear\nuklear_gdi.h">
+      <Filter>Header Files\Nuklear</Filter>
     </ClInclude>
-    <ClInclude Include="WinFileReader.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\Nuklear\nuklear\nuklear_internal.h">
+      <Filter>Header Files\Nuklear</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinPlr.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="WinAudio.cpp">
+      <Filter>Source Files\WinPlr</Filter>
     </ClCompile>
     <ClCompile Include="WinFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WinStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WinThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WinMsg.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\WinPlr</Filter>
     </ClCompile>
     <ClCompile Include="WinFileReader.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\WinPlr</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMsg.cpp">
+      <Filter>Source Files\WinPlr</Filter>
+    </ClCompile>
+    <ClCompile Include="WinPlr.cpp">
+      <Filter>Source Files\WinPlr</Filter>
+    </ClCompile>
+    <ClCompile Include="WinThread.cpp">
+      <Filter>Source Files\WinPlr</Filter>
     </ClCompile>
     <ClCompile Include="WinXAudio.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\WinPlr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_window.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_buffer.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_button.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_chart.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_color.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_color_picker.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_combo.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_context.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_contextual.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_draw.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_edit.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_font.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_group.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_image.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_input.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_layout.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_list_view.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_math.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_menu.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_page_element.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_panel.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_pool.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_popup.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_progress.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_property.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_scrollbar.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_selectable.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_slider.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_string.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_style.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_table.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_text.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_text_editor.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_toggle.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_tooltip.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_tree.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_utf8.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_util.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_vertex.c">
+      <Filter>Source Files\Nuklear</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_widget.c">
+      <Filter>Source Files\Nuklear</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

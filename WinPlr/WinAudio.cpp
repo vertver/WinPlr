@@ -5,7 +5,7 @@
 **********************************************************
 * Module Name: WinAudio mixer
 **********************************************************
-* WinStream.cpp
+* WinAudio.cpp
 * Stream implimintation for WINAPI mixer method
 *********************************************************/
 #include "WinAudio.h"
@@ -126,14 +126,16 @@ Player::Stream::CreateDirectSoundStream(
 	hr = streamData.lpDirectSound->SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
 	R_ASSERT2(hr, "Failed to set cooperative level (DirectSound)");
 
-	// create device caps
-	DSCAPS dsCaps;
-	ZeroMemory(&dsCaps, sizeof(DSCAPS));
-	dsCaps.dwSize = sizeof(DSCAPS);
+	{
+		// create device caps
+		DSCAPS dsCaps;
+		ZeroMemory(&dsCaps, sizeof(DSCAPS));
+		dsCaps.dwSize = sizeof(DSCAPS);
 
-	// get device caps for direct sound pointer
-	hr = streamData.lpDirectSound->GetCaps(&dsCaps);
-	R_ASSERT2(hr, "Stream error! Can't get device caps (DirectSound)");
+		// get device caps for direct sound pointer
+		hr = streamData.lpDirectSound->GetCaps(&dsCaps);
+		R_ASSERT2(hr, "Stream error! Can't get device caps (DirectSound)");
+	}
 
 	// set parameters for primary buffer
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
@@ -144,7 +146,8 @@ Player::Stream::CreateDirectSoundStream(
 	bufferDesc.guid3DAlgorithm = GUID_NULL;
 	
 	// create primary sound buffer with buffer descriptor
-	hr = streamData.lpDirectSound->CreateSoundBuffer(&bufferDesc,
+	hr = streamData.lpDirectSound->CreateSoundBuffer(
+		&bufferDesc,
 		&streamData.lpPrimaryDirectBuffer,
 		NULL
 	);
@@ -225,15 +228,14 @@ Player::Stream::CreateDirectSoundStream(
 	// free temp buffer
 	_RELEASE(tempBuffer);
 
-	BYTE* pBuffer;
-	BYTE* waveData = NULL;
-	DWORD dwBufferSize;
+	LPVOID pBuffer = NULL;
+	DWORD dwBufferSize = NULL;
 
 	// lock buffer
 	hr = streamData.lpSecondaryDirectBuffer->Lock(
 		NULL,
 		dData.dwSize,
-		(LPVOID*)&pBuffer,
+		&pBuffer,
 		(DWORD*)&dwBufferSize,
 		NULL,
 		NULL,
@@ -245,16 +247,12 @@ Player::Stream::CreateDirectSoundStream(
 
 	// unlock buffer
 	hr = streamData.lpSecondaryDirectBuffer->Unlock(
-		(LPVOID)pBuffer,
+		pBuffer,
 		dwBufferSize,
 		NULL,
 		NULL
 	);
 	R_ASSERT2(hr, "Stream error! Can't unlock buffer (DirectSound)");
-
-	// delete buffer
-	delete[] waveData;
-	waveData = NULL;
 
 	return streamData;
 }
@@ -268,7 +266,7 @@ Player::Stream::PlayBufferSound(
 	STREAM_DATA streamData
 )
 {
-	HRESULT hr;
+	HRESULT hr = NULL;
 
 	// if secondary buffer is not empty - use DirectSound
 	if (streamData.lpSecondaryDirectBuffer)
@@ -291,7 +289,9 @@ Player::Stream::StopBufferSound(
 	STREAM_DATA streamData
 )
 {
-	HRESULT hr;
+	HRESULT hr = NULL;
+
+	// if secondary buffer is not empty - try to stop
 	if (streamData.lpSecondaryDirectBuffer)
 	{
 		hr = SUCCEEDED(streamData.lpSecondaryDirectBuffer->Stop());
@@ -302,7 +302,7 @@ Player::Stream::StopBufferSound(
 
 /*************************************************
 * ReleaseSoundBuffers():
-* Release all DirectSound buffers
+* Release all DirectSound pointers
 *************************************************/
 VOID
 Player::Stream::ReleaseSoundBuffers(

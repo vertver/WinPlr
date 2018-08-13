@@ -11,6 +11,8 @@
 
 #include "WinXAudio.h"
 
+Player::ThreadSystem sysThread;
+
 /*************************************************
 * CreateXAudioDevice():
 * Checks buffer on validate
@@ -63,7 +65,8 @@ XAudioPlayer::CreateXAudioDevice(
 	hr = audioStruct.lpXAudio->CreateMasteringVoice(&audioStruct.lpXAudioMasterVoice);
 	R_ASSERT2(hr, "Can't create XAudio Mastering voice.");
 
-	XAUDIO2_SEND_DESCRIPTOR descAudio;
+	// create XAudio descriptor (pOutput is MasteringVoice)
+	XAUDIO2_SEND_DESCRIPTOR descAudio = {};
 	descAudio.Flags = NULL;
 	descAudio.pOutputVoice = audioStruct.lpXAudioMasterVoice;
 
@@ -74,18 +77,18 @@ XAudioPlayer::CreateXAudioDevice(
 	hr = audioStruct.lpXAudio->CreateSourceVoice(
 		&audioStruct.lpXAudioSourceVoice,
 		&waveFormat,
-		NULL, 
-		2.0f, 
-		NULL, 
+		NULL,
+		2.0f,
+		NULL,
 		&audioStruct.voiceSends,
 		NULL
 	);
 	R_ASSERT2(hr, "Can't create XAudio Source voice.");
 
 	// create XAudio buffer
-	XAUDIO2_BUFFER audioXBuffer;
+	XAUDIO2_BUFFER audioXBuffer = {};
 	ZeroMemory(&audioXBuffer, sizeof(XAUDIO2_BUFFER));
-	audioXBuffer.AudioBytes = XAUDIO2_MAX_BUFFER_BYTES;
+	audioXBuffer.AudioBytes = min(XAUDIO2_MAX_BUFFER_BYTES, dData.dwSize);
 	audioXBuffer.Flags = NULL;
 	audioXBuffer.pAudioData = static_cast<BYTE*>(dPCM.lpData);
 
@@ -93,12 +96,8 @@ XAudioPlayer::CreateXAudioDevice(
 	hr = audioStruct.lpXAudioSourceVoice->SubmitSourceBuffer(&audioXBuffer);
 	R_ASSERT2(hr, "Can't submit buffer");
 
-	// get start playing
-	hr = audioStruct.lpXAudioSourceVoice->Start(NULL);
-	hr = audioStruct.lpXAudioSourceVoice->SetVolume(XAudio2AmplitudeRatioToDecibels(0.2f));
-	R_ASSERT2(hr, "Can't start playing");
-
-	XAUDIO_DATA xaudioData;
+	XAUDIO_DATA xaudioData = {};
+	ZeroMemory(&xaudioData, sizeof(XAUDIO_DATA));
 	xaudioData.lpXAudio = audioStruct.lpXAudio;
 	xaudioData.lpXAudioMasterVoice = audioStruct.lpXAudioMasterVoice;
 	xaudioData.lpXAudioSourceVoice = audioStruct.lpXAudioSourceVoice;
@@ -111,11 +110,17 @@ XAudioPlayer::CreateXAudioDevice(
 * Create audio state with count of 
 * played samples
 *************************************************/
-XAUDIO_DATA
-XAudioPlayer::CreateXAudioState(XAUDIO_DATA audioStruct)
+VOID
+XAudioPlayer::CreateXAudioState(
+	XAUDIO_DATA audioStruct
+)
 {
 	HRESULT hr = NULL;
-	audioStruct.lpXAudioSourceVoice->GetState(&audioStruct.voiceState);
+
+	// get start playing
+	hr = audioStruct.lpXAudioSourceVoice->Start(NULL);
+	hr = audioStruct.lpXAudioSourceVoice->SetVolume(XAudio2AmplitudeRatioToDecibels(0.2f));
+	R_ASSERT2(hr, "Can't start playing");
 
 	/*************************************************
 	* SamplesPlayed - is count of played samples.
@@ -124,12 +129,19 @@ XAudioPlayer::CreateXAudioState(XAUDIO_DATA audioStruct)
 	* know about how much samples be played.
 	*************************************************/
 
-	XAUDIO_DATA xaudioData;
-	xaudioData.lpXAudio = audioStruct.lpXAudio;
-	xaudioData.lpXAudioMasterVoice = audioStruct.lpXAudioMasterVoice;
-	xaudioData.lpXAudioSourceVoice = audioStruct.lpXAudioSourceVoice;
-	xaudioData.voiceState = audioStruct.voiceState;
-	return xaudioData;
+	// get first state info
+	audioStruct.lpXAudioSourceVoice->GetState(&audioStruct.voiceState);
+
+	while (audioStruct.voiceState.BuffersQueued > NULL)
+	{
+		// get state of stream
+		audioStruct.lpXAudioSourceVoice->GetState(&audioStruct.voiceState);
+		// wait for next check
+		Sleep(10);
+	}
+
+	audioStruct.lpXAudioSourceVoice->Stop();
+	_RELEASE(audioStruct.lpXAudio);
 }
 
 /*************************************************
@@ -142,8 +154,9 @@ CreateXAudioThread(
 	AUDIO_FILE* xAudioFile
 )
 {
-	XAudioPlayer xPlayer;
-	XAUDIO_DATA xData;
+	XAudioPlayer xPlayer = {};
+	XAUDIO_DATA xData = {};
+	ZeroMemory(&xData, sizeof(XAUDIO_DATA));
 
 	xData = xPlayer.CreateXAudioDevice(xAudioFile->dData, xAudioFile->dPCM);
 	xPlayer.CreateXAudioState(xData);

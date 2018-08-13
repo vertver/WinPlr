@@ -19,6 +19,7 @@ CreateWarningText(
 	LPCSTR lpMsgText
 )
 {
+	__debugbreak();
 	MessageBoxA(
 		NULL,
 		lpMsgText,
@@ -26,7 +27,6 @@ CreateWarningText(
 		MB_OK |
 		MB_ICONWARNING
 	);
-	__debugbreak();
 	ExitProcess(FALSE);
 	// if warning - FALSE
 }
@@ -44,6 +44,8 @@ CreateErrorText(
 	LPSTR lpMessage = NULL;
 	LPCSTR lpCMessage = NULL;
 	std::string szString;
+
+	__debugbreak();
 
 	// if we got system error
 	if (!(dwError == NOERROR))
@@ -75,7 +77,7 @@ CreateErrorText(
 		std::string("\n") +
 		std::string("#############################################\n") +
 		std::string("\n") +
-		"Do you wand to break program? Press 'yes' if want, or 'no' if don't.");
+		"Do you want to break program? Press 'yes' if want, or 'no' if don't.");
 
 	// display message with error string
 	int msg = MessageBoxA(
@@ -90,7 +92,6 @@ CreateErrorText(
 	{
 	case IDYES:	
 		// if error - TRUE
-		__debugbreak();
 		ExitProcess(TRUE);
 		break;
 	case IDCANCEL:
@@ -120,6 +121,8 @@ CreateErrorText(
 	LPSTR lpMessage = NULL;
 	LPCSTR lpCMessage = NULL;
 	std::string szString;
+
+	__debugbreak();
 
 	// if we got system error
 	if (!(dwError == NOERROR))
@@ -154,7 +157,7 @@ CreateErrorText(
 		lpError + std::string("(") + "HRESULT: " +
 		std::to_string(hr) + std::string(")") +
 		std::string("\n") +
-		"Do you wand to break program? Press 'yes' if want, or 'no' if don't.";
+		"Do you want to break program? Press 'yes' if want, or 'no' if don't.";
 
 	// display message with error string
 	int msg = MessageBoxA(
@@ -170,7 +173,6 @@ CreateErrorText(
 	case IDCANCEL:
 	case IDYES:
 		// if error - TRUE
-		__debugbreak();
 		ExitProcess(TRUE);
 		break;
 	case IDNO:
@@ -188,6 +190,7 @@ CreateInfoText(
 	LPCSTR lpMsgText
 )
 {
+	__debugbreak();
 	MessageBoxA(
 		NULL,
 		lpMsgText,
@@ -195,7 +198,6 @@ CreateInfoText(
 		MB_OK |
 		MB_ICONASTERISK
 	);
-	__debugbreak();
 	// if info - nothing
 }
 

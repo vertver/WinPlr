@@ -20,18 +20,16 @@ Player::Buffer::LoadFileToBuffer(
 	HWND hwnd,
 	HANDLE hData,
 	FILE_DATA dFile,
-	PCM_DATA dPCM,
-	FFT_DATA dFFT
+	PCM_DATA dPCM
 )
 {
 	// set zero for our structs
 	ZeroMemory(&dFile, sizeof(FILE_DATA));
 	ZeroMemory(&dPCM, sizeof(PCM_DATA));
-	ZeroMemory(&dFFT, sizeof(FFT_DATA));
 
 	// set filedialog struct
 	OPENFILENAMEA oFN;
-	char szName[MAX_PATH];
+	CHAR szName[MAX_PATH];
 	szName[0] = '\0';		// needy for correct filedialog work
 
 	// get params to our struct
@@ -85,45 +83,28 @@ Player::Buffer::LoadFileToBuffer(
 	dFile.hFile = hData;
 	dFile.lpFile = lpData;
 
-	CloseHandle(hData);
+	// free file handle
+	ASSERT(CloseHandle(hData), "Can't close handle");
 
-	// 
+	// get full info about this file
 	FileReader fReader;
 	PCM_DATA fileType = fReader.GetFullFileInfo(oFN.lpstrFile);
 
-	dPCM.bWindows = TRUE;						// WINAPI methods play audio
+	dPCM.bWindows = TRUE;		// WINAPI methods play audio
 	dPCM.dwSamplerate = fileType.dwSamplerate;
 	dPCM.wBitrate = fileType.wBitrate;
-	dPCM.dwTime = 10000;						// 10000 msecs - 10 secs
+	dPCM.dwTime = 10000;		// 10000 msecs - 10 secs
 	dPCM.lpData = lpData;
 	dPCM.lpName = oFN.lpstrFileTitle;
 	dPCM.lpPath = oFN.lpstrFile;
 	dPCM.wChannels = fileType.wChannels;
 
-	dFFT.lpData = lpData;
-	dFFT.dwSizeBuffer = 1024;
-	dFFT.dwSizeWindow = 2048;
-	dFFT.eType = BLACKMANHARRIS_WINDOW;
-
 	HANDLE_DATA hdReturn = { };
 	ZeroMemory(&hdReturn, sizeof(HANDLE_DATA));
 	hdReturn.dData = dFile;
-	hdReturn.dFFT = dFFT;
 	hdReturn.dPCM = dPCM;
 	hdReturn.hwnd = hwnd;
 	return hdReturn;
-}
-
-/*************************************************
-* UnloadFileFromBuffer():
-* Free all handles and structs
-*************************************************/
-VOID
-Player::Buffer::UnloadFileFromBuffer(
-	HANDLE_DATA hdData
-)
-{
-	CloseHandle(hdData.dData.hFile);
 }
 
 /*************************************************

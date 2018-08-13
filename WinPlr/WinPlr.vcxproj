@@ -88,15 +88,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;DEBUG;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>$(SolutionDir)\Nuklear\nuklear\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Winmm.lib;d2d1.lib;dxguid.lib;dsound.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;dsound.lib;dxguid.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -105,15 +106,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>$(SolutionDir)\Nuklear\nuklear\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Winmm.lib;d2d1.lib;dxguid.lib;dsound.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;dsound.lib;dxguid.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -124,17 +126,18 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>$(SolutionDir)\Nuklear\nuklear\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Winmm.lib;d2d1.lib;dxguid.lib;dsound.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;dsound.lib;dxguid.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,31 +148,75 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>$(SolutionDir)\Nuklear\nuklear\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Winmm.lib;d2d1.lib;dxguid.lib;dsound.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Winmm.lib;dsound.lib;dxguid.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Nuklear\nuklear\nuklear.h" />
+    <ClInclude Include="..\Nuklear\nuklear\nuklear_gdi.h" />
+    <ClInclude Include="..\Nuklear\nuklear\nuklear_internal.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WinAudio.h" />
     <ClInclude Include="WinFileReader.h" />
     <ClInclude Include="WinXAudio.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_buffer.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_button.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_chart.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_color.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_color_picker.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_combo.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_context.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_contextual.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_draw.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_edit.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_font.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_group.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_image.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_input.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_layout.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_list_view.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_math.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_menu.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_page_element.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_panel.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_pool.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_popup.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_progress.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_property.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_scrollbar.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_selectable.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_slider.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_string.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_style.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_table.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_text.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_text_editor.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_toggle.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_tooltip.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_tree.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_utf8.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_util.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_vertex.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_widget.c" />
+    <ClCompile Include="..\Nuklear\nuklear\nuklear_window.c" />
     <ClCompile Include="WinFileReader.cpp" />
     <ClCompile Include="WinXAudio.cpp" />
     <ClCompile Include="WinMsg.cpp" />
     <ClCompile Include="WinThread.cpp" />
-    <ClCompile Include="WinStream.cpp" />
+    <ClCompile Include="WinAudio.cpp" />
     <ClCompile Include="WinFile.cpp" />
     <ClCompile Include="WinPlr.cpp" />
   </ItemGroup>
