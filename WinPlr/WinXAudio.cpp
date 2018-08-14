@@ -26,83 +26,74 @@ XAudioPlayer::CreateXAudioDevice(
 	HRESULT hr = NULL;
 	XAUDIO_DATA audioStruct = {};
 	WAVEFORMATEX waveFormat = {};
+	XAUDIO_DATA xaudioData = {};
+	ZeroMemory(&xaudioData, sizeof(XAUDIO_DATA));
 	ZeroMemory(&audioStruct, sizeof(XAUDIO_DATA));
 	ZeroMemory(&waveFormat, sizeof(WAVEFORMATEX));
 
-	// set data to struct
-	waveFormat.nSamplesPerSec = dPCM.dwSamplerate;
-	waveFormat.wBitsPerSample = dPCM.wBitrate;
-	waveFormat.nChannels = dPCM.wChannels;
-	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
-	waveFormat.cbSize = sizeof(WAVEFORMATEX);
-	// check for current format
-	switch (dData.eType)
+	if (dData.dwSize)
 	{
-	case WAV_FILE:
-		waveFormat.wFormatTag = WAVE_FORMAT_PCM;
-		waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
-		break;
-	case ALAC_FILE:
-	case FLAC_FILE:
-	case MPEG3_FILE:
-	case MPEG4_FILE:
-	case OGG_FILE:
-	case OPUS_FILE:
-	case MPEG2_FILE:
-	case AIF_FILE:
-	case UNKNOWN_FILE:
-	default:
-		waveFormat.wFormatTag = WAVE_FORMAT_UNKNOWN;
-		waveFormat.nAvgBytesPerSec = (dPCM.wBitrate / 8);
-		break;
+		// set data to struct
+		waveFormat.cbSize = sizeof(WAVEFORMATEX);
+		waveFormat.nAvgBytesPerSec = dPCM.waveFormat.nAvgBytesPerSec;
+		waveFormat.nBlockAlign = dPCM.waveFormat.nBlockAlign;
+		waveFormat.nChannels = dPCM.waveFormat.nChannels;
+		waveFormat.nSamplesPerSec = dPCM.waveFormat.nSamplesPerSec;
+		waveFormat.wBitsPerSample = dPCM.waveFormat.wBitsPerSample;
+		waveFormat.wFormatTag = dPCM.waveFormat.wFormatTag;
+
+		// use default XAudio processor
+		hr = XAudio2Create(&audioStruct.lpXAudio);
+		R_ASSERT2(hr, "Can't create XAudio device. Please, use DirectSound method.");
+
+		// create default mastering voice
+		hr = audioStruct.lpXAudio->CreateMasteringVoice(&audioStruct.lpXAudioMasterVoice);
+		R_ASSERT2(hr, "Can't create XAudio Mastering voice.");
+
+		// create XAudio descriptor (pOutput is MasteringVoice)
+		XAUDIO2_SEND_DESCRIPTOR descAudio = {};
+		descAudio.Flags = NULL;
+		descAudio.pOutputVoice = audioStruct.lpXAudioMasterVoice;
+
+		audioStruct.voiceSends.SendCount = 1;
+		audioStruct.voiceSends.pSends = &descAudio;
+
+		// create default source voice
+		hr = audioStruct.lpXAudio->CreateSourceVoice(
+			&audioStruct.lpXAudioSourceVoice,
+			&waveFormat,
+			NULL,
+			2.0f,
+			NULL,
+			&audioStruct.voiceSends,
+			NULL
+		);
+		R_ASSERT2(hr, "Can't create XAudio Source voice.");
+
+		// create XAudio buffer
+		XAUDIO2_BUFFER audioXBuffer = {};
+		ZeroMemory(&audioXBuffer, sizeof(XAUDIO2_BUFFER));
+		audioXBuffer.AudioBytes = dData.dwSize;
+		audioXBuffer.pAudioData = dData.lpFile;
+		audioXBuffer.Flags = XAUDIO2_END_OF_STREAM; 
+
+		// if loop length bigger then 0 - set our pcm looplength
+		if (dPCM.pLoopLength > NULL)
+		{
+			audioXBuffer.LoopLength = dPCM.pLoopLength;
+			audioXBuffer.LoopBegin = dPCM.pLoopStart;
+			audioXBuffer.LoopCount = 1;
+		}
+
+		// submit our buffer
+		hr = audioStruct.lpXAudioSourceVoice->SubmitSourceBuffer(&audioXBuffer);
+		R_ASSERT3(hr, "Can't submit buffer (buffer overflow");
+		if (!SUCCEEDED(hr))
+		{
+			_RELEASE(audioStruct.lpXAudio);
+		}
 	}
-
-	// use default XAudio processor
-	hr = XAudio2Create(&audioStruct.lpXAudio);
-	R_ASSERT2(hr, "Can't create XAudio device. Please, use DirectSound method.");
-
-	// create default mastering voice
-	hr = audioStruct.lpXAudio->CreateMasteringVoice(&audioStruct.lpXAudioMasterVoice);
-	R_ASSERT2(hr, "Can't create XAudio Mastering voice.");
-
-	// create XAudio descriptor (pOutput is MasteringVoice)
-	XAUDIO2_SEND_DESCRIPTOR descAudio = {};
-	descAudio.Flags = NULL;
-	descAudio.pOutputVoice = audioStruct.lpXAudioMasterVoice;
-
-	audioStruct.voiceSends.SendCount = 1;
-	audioStruct.voiceSends.pSends = &descAudio;
-
-	// create default source voice
-	hr = audioStruct.lpXAudio->CreateSourceVoice(
-		&audioStruct.lpXAudioSourceVoice,
-		&waveFormat,
-		NULL,
-		2.0f,
-		NULL,
-		&audioStruct.voiceSends,
-		NULL
-	);
-	R_ASSERT2(hr, "Can't create XAudio Source voice.");
-
-	// create XAudio buffer
-	XAUDIO2_BUFFER audioXBuffer = {};
-	ZeroMemory(&audioXBuffer, sizeof(XAUDIO2_BUFFER));
-	audioXBuffer.AudioBytes = min(XAUDIO2_MAX_BUFFER_BYTES, dData.dwSize);
-	audioXBuffer.Flags = NULL;
-	audioXBuffer.pAudioData = static_cast<BYTE*>(dPCM.lpData);
-
-	// submit our buffer
-	hr = audioStruct.lpXAudioSourceVoice->SubmitSourceBuffer(&audioXBuffer);
-	R_ASSERT2(hr, "Can't submit buffer");
-
-	XAUDIO_DATA xaudioData = {};
-	ZeroMemory(&xaudioData, sizeof(XAUDIO_DATA));
-	xaudioData.lpXAudio = audioStruct.lpXAudio;
-	xaudioData.lpXAudioMasterVoice = audioStruct.lpXAudioMasterVoice;
-	xaudioData.lpXAudioSourceVoice = audioStruct.lpXAudioSourceVoice;
-	xaudioData.voiceState = audioStruct.voiceState;
-	return xaudioData;
+	return audioStruct;
 }
 
 /*************************************************
@@ -117,30 +108,37 @@ XAudioPlayer::CreateXAudioState(
 {
 	HRESULT hr = NULL;
 
-	// get start playing
-	hr = audioStruct.lpXAudioSourceVoice->Start(NULL);
-	hr = audioStruct.lpXAudioSourceVoice->SetVolume(XAudio2AmplitudeRatioToDecibels(0.2f));
-	R_ASSERT2(hr, "Can't start playing");
-
-	/*************************************************
-	* SamplesPlayed - is count of played samples.
-	* In one second minimal count of samples is 44100.
-	* To get position of our buffer, we must to
-	* know about how much samples be played.
-	*************************************************/
-
-	// get first state info
-	audioStruct.lpXAudioSourceVoice->GetState(&audioStruct.voiceState);
-
-	while (audioStruct.voiceState.BuffersQueued > NULL)
+	if (audioStruct.lpXAudio)
 	{
-		// get state of stream
-		audioStruct.lpXAudioSourceVoice->GetState(&audioStruct.voiceState);
-		// wait for next check
-		Sleep(10);
+		// get start playing
+		hr = audioStruct.lpXAudioSourceVoice->Start(NULL);
+		R_ASSERT3(hr, "Can't start playing");
+
+		/*************************************************
+		* SamplesPlayed - is count of played samples.
+		* In one second minimal count of samples is 44100.
+		* To get position of our buffer, we must to
+		* know about how much samples be played.
+		*************************************************/
+		BOOL isRunning = TRUE;
+		while (SUCCEEDED(hr) && isRunning)
+		{
+			XAUDIO2_VOICE_STATE state;
+			audioStruct.lpXAudioSourceVoice->GetState(&state);
+			isRunning = (state.BuffersQueued > 0) != 0;
+
+			// wait till the escape key is pressed
+			if (GetAsyncKeyState(VK_ESCAPE))
+				break;
+
+			Sleep(10);
+		}
+
+		// wait till the escape key is released
+		while (GetAsyncKeyState(VK_ESCAPE))
+			Sleep(10);
 	}
 
-	audioStruct.lpXAudioSourceVoice->Stop();
 	_RELEASE(audioStruct.lpXAudio);
 }
 

@@ -30,9 +30,6 @@
     <ClInclude Include="WinAudio.h">
       <Filter>Header Files\WinPlr</Filter>
     </ClInclude>
-    <ClInclude Include="WinFileReader.h">
-      <Filter>Header Files\WinPlr</Filter>
-    </ClInclude>
     <ClInclude Include="WinXAudio.h">
       <Filter>Header Files\WinPlr</Filter>
     </ClInclude>
@@ -54,9 +51,6 @@
       <Filter>Source Files\WinPlr</Filter>
     </ClCompile>
     <ClCompile Include="WinFile.cpp">
-      <Filter>Source Files\WinPlr</Filter>
-    </ClCompile>
-    <ClCompile Include="WinFileReader.cpp">
       <Filter>Source Files\WinPlr</Filter>
     </ClCompile>
     <ClCompile Include="WinMsg.cpp">

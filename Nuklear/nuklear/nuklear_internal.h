@@ -61,7 +61,8 @@
       (defined(__cplusplus) && (__cplusplus >= 201103L)) || \
       (defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200112L)) ||\
       (defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 500)) ||\
-       defined(_ISOC99_SOURCE) || defined(_BSD_SOURCE)
+       defined(_ISOC99_SOURCE) || defined(_BSD_SOURCE) ||\
+	   defined(_WIN32)
       #define NK_VSNPRINTF(s,n,f,a) vsnprintf(s,n,f,a)
   #else
     #define NK_VSNPRINTF(s,n,f,a) vsprintf(s,f,a)

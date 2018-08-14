@@ -23,7 +23,7 @@
     <ProjectGuid>{8FC00EB2-7297-43BC-80C6-06CEDD5255B7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>WinPlr</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -88,7 +88,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;DEBUG;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;USE_DX;DEBUG;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
@@ -106,7 +106,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;USE_DX;DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;USE_DX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
@@ -138,6 +138,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Winmm.lib;dsound.lib;dxguid.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,7 +149,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;_CRT_SECURE_NO_WARNINGS;USE_DX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NK_INCLUDE_FIXED_TYPES;NK_INCLUDE_STANDARD_IO;NK_INCLUDE_STANDARD_VARARGS;NK_IMPLEMENTATION;NK_GDI_IMPLEMENTATION;NK_INCLUDE_DEFAULT_ALLOCATOR;XAUDIO2_HELPER_FUNCTIONS;USE_DX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
@@ -160,6 +161,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Winmm.lib;dsound.lib;dxguid.lib;Xaudio2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -168,7 +170,6 @@
     <ClInclude Include="..\Nuklear\nuklear\nuklear_internal.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WinAudio.h" />
-    <ClInclude Include="WinFileReader.h" />
     <ClInclude Include="WinXAudio.h" />
   </ItemGroup>
   <ItemGroup>
@@ -212,7 +213,6 @@
     <ClCompile Include="..\Nuklear\nuklear\nuklear_vertex.c" />
     <ClCompile Include="..\Nuklear\nuklear\nuklear_widget.c" />
     <ClCompile Include="..\Nuklear\nuklear\nuklear_window.c" />
-    <ClCompile Include="WinFileReader.cpp" />
     <ClCompile Include="WinXAudio.cpp" />
     <ClCompile Include="WinMsg.cpp" />
     <ClCompile Include="WinThread.cpp" />

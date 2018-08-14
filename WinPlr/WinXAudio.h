@@ -15,6 +15,7 @@
 
 #define STREAMING_BUFFER_SIZE 65536
 #define MAX_BUFFER_COUNT 3
+
 typedef struct  
 {
 	IXAudio2* lpXAudio;
@@ -29,7 +30,10 @@ VOID WINAPIV CreateXAudioThread(AUDIO_FILE* xAudioFile);
 class XAudioPlayer
 {
 public:
+	HANDLE hBufferEndEvent;
 
+	XAudioPlayer() : hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL)) {}
+	~XAudioPlayer() { CloseHandle(hBufferEndEvent); }
 
 	XAUDIO_DATA CreateXAudioDevice(FILE_DATA dData, PCM_DATA dPCM);
 	VOID CreateXAudioState(XAUDIO_DATA audioStruct);
