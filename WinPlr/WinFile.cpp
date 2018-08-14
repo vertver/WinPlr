@@ -11,10 +11,10 @@
 #include "WinAudio.h"
 
 /*************************************************
-* LoadFileToBuffer():
-* Load data to structs and handles
+* FindSoundChunk():
+* Find current chunk and return header 
+* if data is presented 
 *************************************************/
-
 const RIFFChunk* FindSoundChunk(
 	_In_reads_bytes_(sizeBytes) const uint8_t* data,
 	_In_ size_t sizeBytes,
