@@ -185,5 +185,8 @@
     <ClCompile Include="..\Nuklear\nuklear\nuklear_widget.c">
       <Filter>Source Files\Nuklear</Filter>
     </ClCompile>
+    <ClCompile Include="WinAsyncAudio.cpp">
+      <Filter>Source Files\WinPlr</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

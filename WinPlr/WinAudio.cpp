@@ -20,9 +20,9 @@ HANDLE hAudioFile;
 *************************************************/
 STREAM_DATA
 Player::Stream::CreateMMIOStream(
-	FILE_DATA dData,
-	PCM_DATA dPCM,
-	HWND hwnd
+	_In_ FILE_DATA dData,
+	_In_ PCM_DATA dPCM,
+	_In_ HWND hwnd
 )
 {
 	STREAM_DATA streamData;
@@ -95,9 +95,9 @@ Player::Stream::CreateMMIOStream(
 *************************************************/
 STREAM_DATA
 Player::Stream::CreateDirectSoundStream(
-	FILE_DATA dData,
-	PCM_DATA dPCM,
-	HWND hwnd
+	_In_ FILE_DATA dData,
+	_In_ PCM_DATA dPCM,
+	_In_ HWND hwnd
 )
 {
 	STREAM_DATA streamData = {};
@@ -144,9 +144,6 @@ Player::Stream::CreateDirectSoundStream(
 		// set parameters for primary buffer
 		bufferDesc.dwSize = sizeof(DSBUFFERDESC);
 		bufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRLVOLUME;
-		bufferDesc.dwBufferBytes = 0;
-		bufferDesc.dwReserved = 0;
-		bufferDesc.lpwfxFormat = NULL;
 		bufferDesc.guid3DAlgorithm = GUID_NULL;
 
 		// create primary sound buffer with buffer descriptor
@@ -171,7 +168,6 @@ Player::Stream::CreateDirectSoundStream(
 		bufferDesc.dwSize = sizeof(DSBUFFERDESC);
 		bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME;
 		bufferDesc.dwBufferBytes = dData.dwSize;
-		bufferDesc.dwReserved = 0;
 		bufferDesc.lpwfxFormat = &waveFormat;
 		bufferDesc.guid3DAlgorithm = GUID_NULL;
 
@@ -201,7 +197,7 @@ Player::Stream::CreateDirectSoundStream(
 			NULL,
 			dData.dwSize,
 			&pBuffer,
-			(DWORD*)&dwBufferSize,
+			(LPDWORD)&dwBufferSize,
 			NULL,
 			NULL,
 			NULL
@@ -228,7 +224,7 @@ Player::Stream::CreateDirectSoundStream(
 *************************************************/
 VOID
 Player::Stream::PlayBufferSound(
-	STREAM_DATA streamData
+	_In_ STREAM_DATA streamData
 )
 {
 	HRESULT hr = NULL;
@@ -251,7 +247,7 @@ Player::Stream::PlayBufferSound(
 *************************************************/
 VOID 
 Player::Stream::StopBufferSound(
-	STREAM_DATA streamData
+	_In_ STREAM_DATA streamData
 )
 {
 	HRESULT hr = NULL;
@@ -271,7 +267,7 @@ Player::Stream::StopBufferSound(
 *************************************************/
 VOID
 Player::Stream::ReleaseSoundBuffers(
-	STREAM_DATA streamData
+	_In_ STREAM_DATA streamData
 )
 {
 	_RELEASE(streamData.lpDirectNotify);

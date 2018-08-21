@@ -19,8 +19,8 @@ Player::ThreadSystem sysThread;
 *************************************************/
 XAUDIO_DATA
 XAudioPlayer::CreateXAudioDevice(
-	FILE_DATA dData,
-	PCM_DATA dPCM
+	_In_ FILE_DATA dData,
+	_In_ PCM_DATA dPCM
 )
 {
 	HRESULT hr = NULL;
@@ -103,7 +103,7 @@ XAudioPlayer::CreateXAudioDevice(
 *************************************************/
 VOID
 XAudioPlayer::CreateXAudioState(
-	XAUDIO_DATA audioStruct
+	_In_ XAUDIO_DATA audioStruct
 )
 {
 	HRESULT hr = NULL;
@@ -120,11 +120,15 @@ XAudioPlayer::CreateXAudioState(
 		* To get position of our buffer, we must to
 		* know about how much samples be played.
 		*************************************************/
+		XAUDIO2_VOICE_STATE state;
+
 		BOOL isRunning = TRUE;
 		while (SUCCEEDED(hr) && isRunning)
 		{
-			XAUDIO2_VOICE_STATE state;
 			audioStruct.lpXAudioSourceVoice->GetState(&state);
+			if (!state.BuffersQueued)
+				break;
+
 			isRunning = (state.BuffersQueued > 0) != 0;
 
 			// wait till the escape key is pressed
@@ -139,6 +143,9 @@ XAudioPlayer::CreateXAudioState(
 			Sleep(10);
 	}
 
+	audioStruct.lpXAudioSourceVoice->Stop(NULL);
+	audioStruct.lpXAudioSourceVoice->DestroyVoice();
+	audioStruct.lpXAudioMasterVoice->DestroyVoice();
 	_RELEASE(audioStruct.lpXAudio);
 }
 
@@ -149,13 +156,14 @@ XAudioPlayer::CreateXAudioState(
 VOID
 WINAPIV
 CreateXAudioThread(
-	AUDIO_FILE* xAudioFile
+	_In_ LPVOID lpFile
 )
 {
 	XAudioPlayer xPlayer = {};
 	XAUDIO_DATA xData = {};
+	AUDIO_FILE* audioFile = (AUDIO_FILE*)lpFile;
 	ZeroMemory(&xData, sizeof(XAUDIO_DATA));
 
-	xData = xPlayer.CreateXAudioDevice(xAudioFile->dData, xAudioFile->dPCM);
+	xData = xPlayer.CreateXAudioDevice(audioFile->dData, audioFile->dPCM);
 	xPlayer.CreateXAudioState(xData);
 }

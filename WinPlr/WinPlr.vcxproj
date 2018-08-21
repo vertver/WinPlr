@@ -213,6 +213,7 @@
     <ClCompile Include="..\Nuklear\nuklear\nuklear_vertex.c" />
     <ClCompile Include="..\Nuklear\nuklear\nuklear_widget.c" />
     <ClCompile Include="..\Nuklear\nuklear\nuklear_window.c" />
+    <ClCompile Include="WinAsyncAudio.cpp" />
     <ClCompile Include="WinXAudio.cpp" />
     <ClCompile Include="WinMsg.cpp" />
     <ClCompile Include="WinThread.cpp" />

@@ -35,17 +35,15 @@
 #define PLAYER_API decltype(dllimport)
 #endif
 
-template<typename T> T freadNum(FILE* f);
-std::string freadStr(FILE* f, size_t len);
-
 struct handle_closer { void operator()(HANDLE h) { if (h) CloseHandle(h); } };
-typedef std::unique_ptr<void, handle_closer> SCOPE_HANDLE;
+using SCOPE_HANDLE = std::unique_ptr<void, handle_closer>;
 
-VOID CreateErrorText(LPCSTR lpMsgText);
-VOID CreateErrorText(LPCSTR lpMsgText, HRESULT hr);
-VOID CreateInfoText(LPCSTR lpMsgText);
-VOID CreateWarningText(LPCSTR lpMsgText);
-VOID ContinueIfYes(LPCSTR lpMsgText, LPCSTR lpMsgTitle);
+LPCWSTR GetUnicodeStringFromAnsi(_In_ LPCSTR lpString);
+VOID CreateErrorText(_In_ LPCSTR lpMsgText);
+VOID CreateErrorText(_In_ LPCSTR lpMsgText, _In_ HRESULT hr);
+VOID CreateInfoText(_In_ LPCSTR lpMsgText);
+VOID CreateWarningText(_In_ LPCSTR lpMsgText);
+VOID ContinueIfYes(_In_ LPCSTR lpMsgText, _In_ LPCSTR lpMsgTitle);
 
 #define DEBUG_MESSAGE(x)	OutputDebugStringA(x); OutputDebugStringA("\n");
 #define _RELEASE(x)			if (x)					{ x->Release(); x = NULL; }	// safety release pointers
@@ -59,7 +57,7 @@ VOID ContinueIfYes(LPCSTR lpMsgText, LPCSTR lpMsgTitle);
 #define R_ASSERT3(x, y)		if (!SUCCEEDED(x))		{ DEBUG_MESSAGE(y); __debugbreak(); }
 #endif
 #define DO_EXIT(x, y)		if (!(x))				{ CreateErrorText(y); }
-#define PLAYER_VERSION		"#PLAYER_VERSION: 0.2.01#"
+#define PLAYER_VERSION		"#PLAYER_VERSION: 0.2.2#"
 
 typedef enum
 {
@@ -111,7 +109,6 @@ typedef struct
 {
 	FILE_DATA dData;			// FILE structure data
 	PCM_DATA dPCM;				// PCM structure data
-	HWND hwnd;					// HWND handle
 } HANDLE_DATA, *HANDLE_DATA_P;
 
 typedef struct
@@ -123,13 +120,6 @@ typedef struct
 	LPDIRECTSOUNDNOTIFY lpDirectNotify;					// DirectSound notify
 	BOOL bPlaying;										// display if audio now is playing
 } STREAM_DATA, *STREAM_DATA_P;
-
-typedef struct  
-{
-	HWND hwnd;					// hwnd for app
-	LPCSTR lpWindowName;		// title of window
-	HINSTANCE hInstance;		// hInstance
-} HWND_DATA, *HWND_DATA_P;
 
 typedef struct
 {
@@ -223,24 +213,27 @@ namespace Player
 	class Buffer
 	{
 	public:
-		HANDLE_DATA LoadFileToBuffer(HWND hwnd, FILE_DATA dFile, PCM_DATA dPCM);
-		BOOL CheckBufferFile(HANDLE_DATA hdData);
+		Buffer();
+		~Buffer();
+		HANDLE_DATA LoadFileToBuffer(_In_ FILE_DATA dFile, _In_ PCM_DATA dPCM);
+		BOOL CheckBufferFile(_In_ HANDLE_DATA hdData);
+
+	private:
+		HANDLE hHeap;
 	};
 	class Stream
 	{
 	public:
-		STREAM_DATA CreateMMIOStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
-		STREAM_DATA CreateDirectSoundStream(FILE_DATA dData, PCM_DATA dPCM, HWND hwnd);
-		VOID PlayBufferSound(STREAM_DATA streamData);
-		VOID StopBufferSound(STREAM_DATA streamData);
-		VOID ReleaseSoundBuffers(STREAM_DATA streamData);
+		STREAM_DATA CreateMMIOStream(_In_ FILE_DATA dData, _In_ PCM_DATA dPCM, _In_ HWND hwnd);
+		STREAM_DATA CreateDirectSoundStream(_In_ FILE_DATA dData, _In_ PCM_DATA dPCM, _In_ HWND hwnd);
+		VOID PlayBufferSound(_In_ STREAM_DATA streamData);
+		VOID StopBufferSound(_In_ STREAM_DATA streamData);
+		VOID ReleaseSoundBuffers(_In_ STREAM_DATA streamData);
 	};
 	class ThreadSystem
 	{
 	public:
-		VOID ThSetNewThreadName(LPCSTR lpName);
-		BOOL ThSetNewWin10ThreadName(LPCWSTR lpName);
-		VOID ThBeginXAudioThread(AUDIO_FILE audioFile);
+		VOID ThSetNewThreadName(_In_ LPCSTR lpName);
 	};
 	class Graphics
 	{

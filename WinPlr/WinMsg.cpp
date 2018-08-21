@@ -16,7 +16,7 @@
 *************************************************/
 VOID 
 CreateWarningText(
-	LPCSTR lpMsgText
+	_In_ LPCSTR lpMsgText
 )
 {
 	__debugbreak();
@@ -37,7 +37,7 @@ CreateWarningText(
 *************************************************/
 VOID 
 CreateErrorText(
-	LPCSTR lpMsgText
+	_In_ LPCSTR lpMsgText
 )
 {
 	DWORD dwError = GetLastError();
@@ -110,8 +110,8 @@ CreateErrorText(
 *************************************************/
 VOID
 CreateErrorText(
-	LPCSTR lpMsgText,
-	HRESULT hr
+	_In_ LPCSTR lpMsgText,
+	_In_ HRESULT hr
 )
 {
 	// get all our errors to display
@@ -187,7 +187,7 @@ CreateErrorText(
 *************************************************/
 VOID 
 CreateInfoText(
-	LPCSTR lpMsgText
+	_In_ LPCSTR lpMsgText
 )
 {
 	__debugbreak();
@@ -209,8 +209,8 @@ CreateInfoText(
 *************************************************/
 VOID
 ContinueIfYes(
-	LPCSTR lpMsgText,
-	LPCSTR lpMsgTitle
+	_In_ LPCSTR lpMsgText,
+	_In_ LPCSTR lpMsgTitle
 ) 
 {
 	int iMsg = MessageBoxA(

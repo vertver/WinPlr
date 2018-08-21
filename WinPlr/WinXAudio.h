@@ -25,16 +25,39 @@ typedef struct
 	XAUDIO2_VOICE_SENDS voiceSends;
 } XAUDIO_DATA, *XAUDIO_DATA_P;
 
-VOID WINAPIV CreateXAudioThread(AUDIO_FILE* xAudioFile);
+VOID WINAPIV CreateXAudioThread(_In_ LPVOID lpFile);
 
-class XAudioPlayer
+class XAudioPlayer : public IXAudio2VoiceCallback
 {
 public:
 	HANDLE hBufferEndEvent;
 
+	STDMETHOD_(void, OnVoiceProcessingPassStart)(UINT32) override
+	{
+	}
+	STDMETHOD_(void, OnVoiceProcessingPassEnd)() override
+	{
+	}
+	STDMETHOD_(void, OnStreamEnd)() override
+	{
+	}
+	STDMETHOD_(void, OnBufferStart)(void*) override
+	{
+	}
+	STDMETHOD_(void, OnBufferEnd)(void*) override
+	{
+		SetEvent(hBufferEndEvent);
+	}
+	STDMETHOD_(void, OnLoopEnd)(void*) override
+	{
+	}
+	STDMETHOD_(void, OnVoiceError)(void*, HRESULT) override
+	{
+	}
+
 	XAudioPlayer() : hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL)) {}
 	~XAudioPlayer() { CloseHandle(hBufferEndEvent); }
 
-	XAUDIO_DATA CreateXAudioDevice(FILE_DATA dData, PCM_DATA dPCM);
-	VOID CreateXAudioState(XAUDIO_DATA audioStruct);
+	XAUDIO_DATA CreateXAudioDevice(_In_ FILE_DATA dData, _In_ PCM_DATA dPCM);
+	VOID CreateXAudioState(_In_ XAUDIO_DATA audioStruct);
 };

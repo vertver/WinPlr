@@ -9,6 +9,25 @@
 * File-system for WinPlr
 *********************************************************/
 #include "WinAudio.h"
+CHAR szName[MAX_PATH];
+
+/*************************************************
+* Buffer():
+* Constructor
+*************************************************/
+Player::Buffer::Buffer()
+{
+	hHeap = HeapCreate(NULL, 0x010000, NULL);
+}
+
+/*************************************************
+* ~Buffer():
+* Destructor
+*************************************************/
+Player::Buffer::~Buffer()
+{
+	HeapDestroy(hHeap);
+}
 
 /*************************************************
 * FindSoundChunk():
@@ -18,17 +37,18 @@
 const RIFFChunk* FindSoundChunk(
 	_In_reads_bytes_(sizeBytes) const uint8_t* data,
 	_In_ size_t sizeBytes,
-	_In_ uint32_t tag)
+	_In_ UINT tag
+)
 {
 	if (!data)
-		return nullptr;
+		return NULL;
 
 	const uint8_t* ptr = data;
 	const uint8_t* end = data + sizeBytes;
 
 	while (end > (ptr + sizeof(RIFFChunk)))
 	{
-		auto header = reinterpret_cast<const RIFFChunk*>(ptr);
+		const RIFFChunk* header = reinterpret_cast<const RIFFChunk*>(ptr);
 		if (header->tag == tag)
 			return header;
 
@@ -36,7 +56,7 @@ const RIFFChunk* FindSoundChunk(
 		ptr += offset;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 /*************************************************
@@ -45,9 +65,8 @@ const RIFFChunk* FindSoundChunk(
 *************************************************/
 HANDLE_DATA
 Player::Buffer::LoadFileToBuffer(
-	HWND hwnd,
-	FILE_DATA dFile,
-	PCM_DATA dPCM
+	_In_ FILE_DATA dFile,
+	_In_ PCM_DATA dPCM
 )
 {
 	// set zero for our structs
@@ -55,14 +74,13 @@ Player::Buffer::LoadFileToBuffer(
 	ZeroMemory(&dPCM, sizeof(PCM_DATA));
 
 	// set filedialog struct
-	OPENFILENAMEA oFN;
-	CHAR szName[MAX_PATH];
 	szName[0] = '\0';		// needy for correct filedialog work
 
+	OPENFILENAMEA oFN = {};
 	// get params to our struct
 	ZeroMemory(&oFN, sizeof(OPENFILENAMEA));
 	oFN.lStructSize = sizeof(OPENFILENAMEA);
-	oFN.hwndOwner = hwnd;
+	oFN.hwndOwner = NULL;
 	oFN.nMaxFile = MAX_PATH;
 	oFN.lpstrFile = szName;
 	oFN.lpstrFilter = "Audio files (.wav)\0*.wav\0";
@@ -72,7 +90,7 @@ Player::Buffer::LoadFileToBuffer(
 	oFN.nFilterIndex = 1;
 	oFN.nMaxFileTitle = 0;
 	oFN.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
+	
 	// if we can't open filedialog - exit
 	if (!GetOpenFileNameA(&oFN))
 	{
@@ -83,19 +101,29 @@ Player::Buffer::LoadFileToBuffer(
 	// create extended handle and copy file to it
 	SCOPE_HANDLE hFile(CreateFileA(
 		oFN.lpstrFile,
-		GENERIC_READ | GENERIC_WRITE,
+		GENERIC_READ,
 		NULL,
 		NULL,
 		OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL,
 		NULL
 	));
-
+	if (GetLastError() == ERROR_SHARING_VIOLATION)
+	{
+		MessageBoxA(
+			NULL,
+			"The file handle is busy. Please, free file from another applications to continue.",
+			"Error",
+			MB_OK | MB_ICONHAND
+		);
+		ExitProcess(TRUE);
+	}
 	DWORD dwSizeWritten = NULL;
 	FILE_STANDARD_INFO fileInfo = {};
 
 	// check for corrupted handle and check information from file
 	ASSERT(hFile, "Filesystem error! Can't find file!");
+	// if we can't get file info - we can't open this file
 	ASSERT(GetFileInformationByHandleEx(hFile.get(), FileStandardInfo, &fileInfo, sizeof(fileInfo)), "FileInfo");
 
 	// file is too big for 32-bit allocation, so reject read
@@ -110,7 +138,7 @@ Player::Buffer::LoadFileToBuffer(
 		DEBUG_MESSAGE("Lowpart file is invalid");
 	}
 
-	BYTE* lpWaveFile = (BYTE*)malloc(fileInfo.EndOfFile.LowPart);
+	BYTE* lpWaveFile = (BYTE*)HeapAlloc(hHeap, HEAP_ZERO_MEMORY, fileInfo.EndOfFile.LowPart);
 
 	// reset our pointer and read data to it
 	ASSERT(ReadFile(hFile.get(), lpWaveFile, fileInfo.EndOfFile.LowPart, &dwSizeWritten, NULL), "Can't read file");
@@ -179,7 +207,7 @@ Player::Buffer::LoadFileToBuffer(
 		{
 			DEBUG_MESSAGE("File is not a RIFF (fmtChunk->size < sizeof(WAVEFORMATEX))");
 		}
-		auto wfx = reinterpret_cast<const WAVEFORMATEX*>(ptr);
+		const WAVEFORMATEX* wfx = reinterpret_cast<const WAVEFORMATEX*>(ptr);
 
 		if (fmtChunk->size < (sizeof(WAVEFORMATEX) + wfx->cbSize))
 		{
@@ -209,7 +237,7 @@ Player::Buffer::LoadFileToBuffer(
 				static const GUID s_wfexBase =
 				{ 0x00000000, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 };
 
-				auto wfex = reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(ptr);
+				const WAVEFORMATEXTENSIBLE* wfex = reinterpret_cast<const WAVEFORMATEXTENSIBLE*>(ptr);
 
 				DO_EXIT(!memcmp(
 					reinterpret_cast<const BYTE*>(&wfex->SubFormat) +
@@ -253,8 +281,8 @@ Player::Buffer::LoadFileToBuffer(
 	ptr = reinterpret_cast<const uint8_t*>(dataChunk) + sizeof(RIFFChunk);
 	ASSERT(!(ptr + dataChunk->size > wavEnd), "size > wavEnd");
 
-	uint32_t pLoopStart = NULL;
-	uint32_t pLoopLength = NULL;
+	UINT pLoopStart = NULL;
+	UINT pLoopLength = NULL;
 
 	const RIFFChunk* dlsChunk = FindSoundChunk(ptr, riffChunk->size, FOURCC_DLS_SAMPLE);
 	if (dlsChunk)
@@ -269,7 +297,7 @@ Player::Buffer::LoadFileToBuffer(
 			if (dlsChunk->size >= (dlsSample->size + dlsSample->loopCount * sizeof(DLSLoop)))
 			{
 				const DLSLoop* loops = reinterpret_cast<const DLSLoop*>(ptr + dlsSample->size);
-				for (uint32_t j = 0; j < dlsSample->loopCount; ++j)
+				for (UINT j = 0; j < dlsSample->loopCount; ++j)
 				{
 					if ((loops[j].loopType == DLSLoop::LOOP_TYPE_FORWARD || loops[j].loopType == DLSLoop::LOOP_TYPE_RELEASE))
 					{
@@ -296,7 +324,7 @@ Player::Buffer::LoadFileToBuffer(
 			if (midiChunk->size >= (sizeof(RIFFMIDISample) + midiSample->loopCount * sizeof(MIDILoop)))
 			{
 				const MIDILoop* loops = reinterpret_cast<const MIDILoop*>(ptr + sizeof(RIFFMIDISample));
-				for (uint32_t j = 0; j < midiSample->loopCount; ++j)
+				for (UINT j = 0; j < midiSample->loopCount; ++j)
 				{
 					if (loops[j].type == MIDILoop::LOOP_TYPE_FORWARD)
 					{
@@ -327,13 +355,12 @@ Player::Buffer::LoadFileToBuffer(
 	dPCM.pLoopLength = pLoopLength;
 	dPCM.pLoopStart = pLoopStart;
 	dPCM.lpData = lpWaveFile;
-	dPCM.lpPath = oFN.lpstrFile;
+	dPCM.lpPath = szName;
 
 	HANDLE_DATA hdReturn = { };
 	ZeroMemory(&hdReturn, sizeof(HANDLE_DATA));
 	hdReturn.dData = dFile;
 	hdReturn.dPCM = dPCM;
-	hdReturn.hwnd = hwnd;
 	return hdReturn;
 }
 
@@ -343,11 +370,12 @@ Player::Buffer::LoadFileToBuffer(
 *************************************************/
 BOOL
 Player::Buffer::CheckBufferFile(
-	HANDLE_DATA hdData
+	_In_ HANDLE_DATA hdData
 )
 {
-	if (!hdData.hwnd && !hdData.dData.lpFile)
+	if (!hdData.dData.lpFile)
 		return FALSE;
 	else
 		return TRUE;
 }
+ 
