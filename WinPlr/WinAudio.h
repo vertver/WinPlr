@@ -218,7 +218,6 @@ namespace Player
 		HANDLE_DATA LoadFileToBuffer(_In_ FILE_DATA dFile, _In_ PCM_DATA dPCM);
 		BOOL CheckBufferFile(_In_ HANDLE_DATA hdData);
 
-	private:
 		HANDLE hHeap;
 	};
 	class Stream
